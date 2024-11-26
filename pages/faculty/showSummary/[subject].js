@@ -1,9 +1,19 @@
 import React, { useState } from "react";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 // Sample data for students
 const studentsData = [
   { index: 1, name: "John Doe", enrollment: "2021BCSE001", percent: 85, date: "2024-11-01" },
+  { index: 2, name: "Jane Smith", enrollment: "2021BCSE002", percent: 90, date: "2024-11-02" },
+  { index: 3, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
+  { index: 4, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
+  { index: 5, name: "David Wilson", enrollment: "2021BCSE005", percent: 78, date: "2024-11-02" },
+  { index: 2, name: "Jane Smith", enrollment: "2021BCSE002", percent: 90, date: "2024-11-02" },
+  { index: 3, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
+  { index: 4, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
+  { index: 5, name: "David Wilson", enrollment: "2021BCSE005", percent: 78, date: "2024-11-02" },
   { index: 2, name: "Jane Smith", enrollment: "2021BCSE002", percent: 90, date: "2024-11-02" },
   { index: 3, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
   { index: 4, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
@@ -14,7 +24,7 @@ function AttendanceSummaryPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [percentFilter, setPercentFilter] = useState("");
-  
+
   const router = useRouter();
   const { subject } = router.query;
 
@@ -30,6 +40,41 @@ function AttendanceSummaryPage() {
     return withinDateRange && withinPercentRange;
   });
 
+  // Generate PDF
+  const generatePDF = () => {
+    const doc = new jsPDF();
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text("Attendance Summary", 14, 20);
+    if (subject) {
+      doc.text(`Subject: ${subject}`, 14, 30);
+    }
+
+    // Define columns for the table
+    const columns = [
+      { header: "Index", dataKey: "index" },
+      { header: "Name", dataKey: "name" },
+      { header: "Enrollment", dataKey: "enrollment" },
+      { header: "Percent", dataKey: "percent" },
+    ];
+
+    // Add table
+    doc.autoTable({
+      startY: subject ? 40 : 30,
+      head: [columns.map((col) => col.header)],
+      body: filteredStudents.map((student) => [
+        student.index,
+        student.name,
+        student.enrollment,
+        `${student.percent}%`,
+      ]),
+    });
+
+    // Save the PDF
+    doc.save("Attendance_Summary.pdf");
+  };
+
   return (
     <div className="flex flex-col items-center justify-center bg-gray-800 p-4 sm:p-6">
       <div className="w-full max-w-4xl bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md">
@@ -40,7 +85,7 @@ function AttendanceSummaryPage() {
           {subject}
         </h2>
 
-        {/* Date Range Filter */}
+        {/* Filters */}
         <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div>
@@ -63,7 +108,6 @@ function AttendanceSummaryPage() {
             </div>
           </div>
 
-          {/* Percent Filter */}
           <div>
             <label className="block text-sm text-gray-400">Min Percent</label>
             <input
@@ -78,8 +122,16 @@ function AttendanceSummaryPage() {
           </div>
         </div>
 
-        {/* Attendance Table */}
-        <div className="overflow-x-auto">
+
+        <button
+          onClick={generatePDF}
+          className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700   focus:outline-none"
+        >
+          Download PDF
+        </button>
+      
+        {/* Table */}
+        <div className="overflow-x-auto mb-4 sm:mb-6">
           <table className="w-full table-auto border-collapse">
             <thead>
               <tr className="bg-gray-800 text-gray-400">
@@ -109,6 +161,9 @@ function AttendanceSummaryPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Download PDF Button */}
+
       </div>
     </div>
   );
