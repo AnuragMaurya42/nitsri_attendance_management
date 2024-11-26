@@ -60,6 +60,7 @@ export default function Dashboard() {
               router.push("/login/faculty");
             }, 2000);
           } else {
+            localStorage.setItem('role',"faculty");
             setUser(data.user);
           }
         } catch (error) {

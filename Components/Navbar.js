@@ -5,11 +5,19 @@ export default function Navbar() {
     const router = useRouter();
 
     const handleLogout = () => {
-        localStorage.removeItem('authToken'); 
-        sessionStorage.removeItem('authToken');
-        window.location.href = '/'; 
+        var role = localStorage.getItem('role');
+        console.log(role);
+        if (role == 'faculty') {
+            localStorage.removeItem('facultyToken');
+        }
+        else if (role == 'admin') {
+            localStorage.removeItem('adminToken');
+        }
+        else if (role == 'student') {
+            localStorage.removeItem('studentToken');
+        }
+        router.push("/");
     };
-    
 
     return (
         <nav className="bg-gray-800 p-4 flex justify-between items-center">

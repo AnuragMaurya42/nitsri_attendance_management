@@ -45,7 +45,7 @@ export default function Dashboard() {
               router.push("/login/student");
             }, 2000);
           } else {
-            console.log(data.user);
+            localStorage.setItem('role',"student");
             setUser(data.user);
           }
         } catch (error) {

@@ -65,6 +65,7 @@ export default function Dashboard() {
               router.push("/login/admin");
             }, 2000);
           } else {
+            localStorage.setItem('role',"admin");
             setUser(data.user);
           }
         } catch (error) {

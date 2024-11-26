@@ -213,7 +213,7 @@ function LoginPage() {
 
   useEffect(() => {
     setLoading(true);
-    if (role=='admin' && localStorage.getItem('admintoken')) {
+    if (role=='admin' && localStorage.getItem('adminToken')) {
       setLoading(false);
       router.push("/admin/dashboard");
     }
