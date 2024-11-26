@@ -64,7 +64,7 @@ function LoginPage() {
 
         if (receivedData.Success) {
           setLoading(false);
-          localStorage.setItem("admintoken", receivedData.token);
+          localStorage.setItem("adminToken", receivedData.token);
           toast.success(receivedData.SuccessMessage, {
             position: "top-center",
             autoClose: 1000,

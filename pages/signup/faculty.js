@@ -198,7 +198,7 @@ function SignupPage() {
   
       const data = await response.json();
       setLoading(false);
-      if (response.ok) {
+      if (response.Success) {
         toast.success(data.SuccessMessage || "Successfully signed up!", {
           position: "top-center",
           autoClose: 2000,

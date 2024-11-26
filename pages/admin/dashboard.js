@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/router";
 import { ToastContainer, toast } from "react-toastify"; 
 
 const subjects = [
@@ -13,6 +14,9 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [newCourseName, setNewCourseName] = useState("");
   const [newCourseCode, setNewCourseCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null); // Added state for user
+  const router = useRouter();
 
   const filteredSubjects = subjects.filter(
     (subject) =>
@@ -30,9 +34,60 @@ export default function Dashboard() {
     );
   };
 
+  useEffect(() => {
+    setLoading(true);
+    if (localStorage.getItem("adminToken")) {
+      let token = localStorage.getItem("adminToken");
+      const helper = async () => {
+        try {
+          const res = await fetch("/api/adminapis/getadmin", {
+            method: "POST",
+            body: JSON.stringify({ token }), // Wrapped token in an object
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const data = await res.json();
+          if (!data.Success) {
+            localStorage.removeItem("adminToken");
+            toast.error(data.ErrorMessage, {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+              transition: Bounce,
+            });
+            setTimeout(() => {
+              router.push("/login/admin");
+            }, 2000);
+          } else {
+            setUser(data.user);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      helper();
+    } else {
+      router.push("/login/admin");
+    }
+    setLoading(false);
+  }, [router]);
+
+
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
       <ToastContainer ></ToastContainer>
+      {loading ? (
+        <div className="relative h-custom flex justify-center items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      ) : (
+        <div>
       <div className="bg-gray-800 shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
         <h1
           className="text-5xl font-bold text-green-500 mb-5"
@@ -126,8 +181,10 @@ export default function Dashboard() {
                 Cancel
               </button>
             </div>
-          </div>
+          </div>0
         </div>
+      )}
+      </div>
       )}
     </div>
   );

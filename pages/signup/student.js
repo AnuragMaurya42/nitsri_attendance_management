@@ -209,7 +209,7 @@ function StudentSignupPage() {
 
       const data = await response.json();
       setLoading(false);
-      if (response.ok) {
+      if (data.Sucess) {
         toast.success(data.SuccessMessage || "Successfully signed up!", {
           position: "top-center",
           autoClose: 2000,
