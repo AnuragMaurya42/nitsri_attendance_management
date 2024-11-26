@@ -37,7 +37,7 @@ function AttendanceSummaryPage() {
     const withinDateRange = (!start || studentDate >= start) && (!end || studentDate <= end);
     const withinPercentRange = percentFilter ? student.percent >= parseInt(percentFilter) : true;
 
-    return withinDateRange && withinPercentRange;
+    return withinDateRange || withinPercentRange;
   });
 
   // Generate PDF
