@@ -78,7 +78,7 @@ export default function TakeAttendence() {
 
       {/* Subject */}
       <div className="bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-md mb-6">
-        <label className="block text-sm font-medium mb-2">Subject:</label>
+        <label className="block text-sm font-medium mb-2">Subject: </label>
         <p className="text-lg font-semibold">{subject}</p>
       </div>
 
