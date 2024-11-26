@@ -4,9 +4,10 @@ import bcrypt from 'bcrypt';
 
 const handler = async (req, res) => {
   if (req.method === 'POST') {
-    const { adminId, email, passcode, adminName,department } = req.body;
+    const { adminId, email, passcode, adminName, department } = req.body;
     const saltRounds = 10;
 
+    // Check for missing fields
     if (!adminId || !email || !passcode || !adminName || !department) {
       return res.status(400).json({
         Success: false,
@@ -16,8 +17,20 @@ const handler = async (req, res) => {
     }
 
     try {
+      // Check if an admin with the same email already exists
+      const existingAdmin = await Admin.findOne({ email });
+      if (existingAdmin) {
+        return res.status(409).json({
+          Success: false,
+          ErrorCode: 409,
+          ErrorMessage: "An admin with this email already exists!",
+        });
+      }
+
+      // Hash the passcode
       const hashedPasscode = await bcrypt.hash(passcode, saltRounds);
 
+      // Create a new admin
       const newAdmin = new Admin({
         adminId,
         email,
