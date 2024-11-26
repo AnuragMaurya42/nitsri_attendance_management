@@ -1,11 +1,10 @@
-import Admin from "@/models/Admin";
+import Faculty from "@/models/Faculty";
 import connectDb from "@/middleware/mongoose";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const handler = async (req, res) => {
-  const jwt = require('jsonwebtoken');
-
-  if (req.method === 'POST') {
+  if (req.method === "POST") {
     try {
       const { email, password } = req.body;
 
@@ -17,16 +16,26 @@ const handler = async (req, res) => {
         });
       }
 
-      const existingAdmin = await Admin.findOne({ email });
-      if (!existingAdmin) {
+      const faculty = await Faculty.findOne({ email });
+
+      if (!faculty) {
         return res.status(404).json({
           Success: false,
           ErrorCode: 404,
-          ErrorMessage: "Admin not found with the provided email.",
+          ErrorMessage: "Faculty not found with the provided email.",
         });
       }
 
-      const isPasswordValid = bcrypt.compareSync(password, existingAdmin.passcode);
+      if (!faculty.email_verified) {
+        return res.status(400).json({
+          Success: false,
+          ErrorCode: 400,
+          ErrorMessage: "Email not verified. Please verify your email first.",
+        });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, faculty.password);
+
       if (!isPasswordValid) {
         return res.status(401).json({
           Success: false,
@@ -37,19 +46,19 @@ const handler = async (req, res) => {
 
       const token = jwt.sign(
         {
-          adminId: existingAdmin.adminId,
-          email: existingAdmin.email,
-          adminName: existingAdmin.adminName,
+          facultyId: faculty._id,
+          email: faculty.email,
+          facultyName: faculty.name,
         },
-        process.env.NEXT_PUBLIC_JWT_SECRET3 
+        process.env.NEXT_PUBLIC_JWT_SECRET3,
+        { expiresIn: "1d" }
       );
-      
+
       return res.status(200).json({
         Success: true,
         SuccessMessage: "Login successful.",
         token: token,
       });
-
     } catch (error) {
       return res.status(500).json({
         Success: false,
