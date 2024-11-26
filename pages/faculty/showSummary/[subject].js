@@ -10,15 +10,18 @@ const studentsData = [
   { index: 3, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
   { index: 4, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
   { index: 5, name: "David Wilson", enrollment: "2021BCSE005", percent: 78, date: "2024-11-02" },
-  { index: 2, name: "Jane Smith", enrollment: "2021BCSE002", percent: 90, date: "2024-11-02" },
-  { index: 3, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
-  { index: 4, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
-  { index: 5, name: "David Wilson", enrollment: "2021BCSE005", percent: 78, date: "2024-11-02" },
-  { index: 2, name: "Jane Smith", enrollment: "2021BCSE002", percent: 90, date: "2024-11-02" },
-  { index: 3, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
-  { index: 4, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
-  { index: 5, name: "David Wilson", enrollment: "2021BCSE005", percent: 78, date: "2024-11-02" },
+  { index: 6, name: "Jane Smith", enrollment: "2021BCSE002", percent: 90, date: "2024-11-02" },
+  { index: 7, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
+  { index: 8, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
+  { index: 8, name: "David Wilson", enrollment: "2021BCSE005", percent: 78, date: "2024-11-02" },
 ];
+
+// Utility to remove duplicates based on a field (e.g., "index")
+const removeDuplicates = (data, key) => {
+  return Array.from(new Set(data.map((item) => item[key]))).map((uniqueKey) =>
+    data.find((item) => item[key] === uniqueKey)
+  );
+};
 
 function AttendanceSummaryPage() {
   const [startDate, setStartDate] = useState("");
@@ -28,16 +31,20 @@ function AttendanceSummaryPage() {
   const router = useRouter();
   const { subject } = router.query;
 
+  // Clean up duplicates in the student data
+  const uniqueStudents = removeDuplicates(studentsData, "index");
+
   // Filter students based on date range and percent
-  const filteredStudents = studentsData.filter((student) => {
+  const filteredStudents = uniqueStudents.filter((student) => {
     const studentDate = new Date(student.date);
     const start = startDate ? new Date(startDate) : null;
     const end = endDate ? new Date(endDate) : null;
 
     const withinDateRange = (!start || studentDate >= start) && (!end || studentDate <= end);
-    const withinPercentRange = percentFilter ? student.percent >= parseInt(percentFilter) : true;
+    const minPercent = percentFilter ? parseInt(percentFilter, 10) : 0;
+    const withinPercentRange = student.percent >= minPercent;
 
-    return withinDateRange || withinPercentRange;
+    return withinDateRange && withinPercentRange;
   });
 
   // Generate PDF
@@ -52,23 +59,19 @@ function AttendanceSummaryPage() {
     }
 
     // Define columns for the table
-    const columns = [
-      { header: "Index", dataKey: "index" },
-      { header: "Name", dataKey: "name" },
-      { header: "Enrollment", dataKey: "enrollment" },
-      { header: "Percent", dataKey: "percent" },
-    ];
+    const columns = ["Index", "Name", "Enrollment", "Percent"];
+    const rows = filteredStudents.map((student) => [
+      student.index,
+      student.name,
+      student.enrollment,
+      `${student.percent}%`,
+    ]);
 
     // Add table
     doc.autoTable({
       startY: subject ? 40 : 30,
-      head: [columns.map((col) => col.header)],
-      body: filteredStudents.map((student) => [
-        student.index,
-        student.name,
-        student.enrollment,
-        `${student.percent}%`,
-      ]),
+      head: [columns],
+      body: rows,
     });
 
     // Save the PDF
@@ -107,7 +110,6 @@ function AttendanceSummaryPage() {
               />
             </div>
           </div>
-
           <div>
             <label className="block text-sm text-gray-400">Min Percent</label>
             <input
@@ -122,14 +124,12 @@ function AttendanceSummaryPage() {
           </div>
         </div>
 
-
         <button
           onClick={generatePDF}
-          className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700   focus:outline-none"
+          className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
         >
           Download PDF
         </button>
-      
         {/* Table */}
         <div className="overflow-x-auto mb-4 sm:mb-6">
           <table className="w-full table-auto border-collapse">
@@ -163,7 +163,7 @@ function AttendanceSummaryPage() {
         </div>
 
         {/* Download PDF Button */}
-
+   
       </div>
     </div>
   );
