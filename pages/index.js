@@ -30,8 +30,8 @@ export default function Home() {
             width: "100%",
             height:"60px",
             color: "white",
-            backgroundImage:
-              "linear-gradient(to bottom right, #7f00ff, #1e90ff)",
+            backgroundColor: "#28a745",
+
             border: "none",
             borderRadius: "1rem",
             fontWeight: "500",
@@ -51,8 +51,7 @@ export default function Home() {
             width: "100%",
             height:"60px",
             color: "white",
-            backgroundImage:
-              "linear-gradient(to bottom right, #7f00ff, #1e90ff)",
+            backgroundColor: "#28a745",
             border: "none",
             borderRadius: "1rem",
             fontWeight: "500",
@@ -72,8 +71,7 @@ export default function Home() {
             width: "100%",
             height:"60px",
             color: "white",
-            backgroundImage:
-              "linear-gradient(to bottom right, #7f00ff, #1e90ff)",
+            backgroundColor: "#28a745",
             border: "none",
             borderRadius: "1rem",
             fontWeight: "500",
