@@ -11,7 +11,7 @@ export default function Dashboard() {
         <div className="dark min-h-screen bg-gray-900 text-gray-100">
             <div className="bg-gray-800 shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
                 <h1 className="text-5xl font-bold text-green-500 mb-5" style={{ fontFamily: 'Courier New, Courier, monospace', 
-                  color: 'rbg(34 197 50)'
+                  color: 'rbg((34 197 50)'
                 }}>STUDENT</h1>
                 <h2 className="text-2xl font-bold mb-4">Anurag Maurya</h2>
                 <p className="text-gray-400 mb-4">Enrollment: 2021BCSE042</p>
