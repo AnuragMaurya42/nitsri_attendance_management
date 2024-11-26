@@ -7,13 +7,25 @@ function SignupPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    otp: "",
   });
 
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    otp: "",
+  });
+
+  const [otpSent, setOtpSent] = useState(false);
   const departments = [
     "Computer Science",
     "Information Technology",
     "Electrical Engineering",
-    "Electronics and Communication System",
+    "Electronics and communication engineering ",
+    "Civil engineering",
+    "Mechanical engineering",
+    "Chemical engineering",
+    "Metallurgy"
   ];
 
   const handleChange = (e) => {
@@ -21,14 +33,58 @@ function SignupPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setErrors({
+      ...errors,
+      [e.target.name]: "",
+    });
+  };
+
+  const handleSendOtp = () => {
+    if (!formData.email.endsWith("@nitsri.ac.in")) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Email must belong to the domain '@nitsri.ac.in'.",
+      }));
+      return;
+    }
+    // Mock sending OTP
+    alert("OTP sent to your email!");
+    setOtpSent(true);
+  };
+
+  const handleVerifyOtp = () => {
+    if (formData.otp !== "123456") { // Mock OTP verification
+      setErrors((prev) => ({
+        ...prev,
+        otp: "Invalid OTP. Please try again.",
+      }));
+      return;
+    }
+    alert("OTP verified successfully!");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+
+    // Email Validation
+    if (!formData.email.endsWith("@nitsri.ac.in")) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Email must belong to the domain '@nitsri.ac.in'.",
+      }));
       return;
     }
+
+    // Password Validation
+    if (formData.password !== formData.confirmPassword) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "Passwords do not match.",
+      }));
+      return;
+    }
+
+    // Submit Form
     alert("Form submitted successfully!");
     console.log(formData);
   };
@@ -102,10 +158,59 @@ function SignupPage() {
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
+                errors.email ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+              }`}
               required
             />
+            {errors.email && (
+              <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+            )}
           </div>
+
+          {/* OTP Section */}
+          {otpSent && (
+            <div className="mb-4">
+              <label
+                htmlFor="otp"
+                className="block text-sm font-medium text-gray-600 mb-2"
+              >
+                OTP
+              </label>
+              <input
+                type="text"
+                id="otp"
+                name="otp"
+                placeholder="Enter OTP"
+                value={formData.otp}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
+                  errors.otp ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                }`}
+                required
+              />
+              {errors.otp && (
+                <p className="text-xs text-red-500 mt-1">{errors.otp}</p>
+              )}
+              <button
+                type="button"
+                onClick={handleVerifyOtp}
+                className="w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
+              >
+                Verify OTP
+              </button>
+            </div>
+          )}
+
+          {!otpSent && (
+            <button
+              type="button"
+              onClick={handleSendOtp}
+              className="w-full mb-4 px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              Send OTP
+            </button>
+          )}
 
           {/* Password Input */}
           <div className="mb-4">
@@ -145,6 +250,9 @@ function SignupPage() {
               className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             />
+            {errors.password && (
+              <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+            )}
           </div>
 
           {/* Signup Button */}
