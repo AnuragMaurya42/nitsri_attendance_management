@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useRouter } from "next/router";
 
 function StudentSignupPage() {
   const [formData, setFormData] = useState({
@@ -24,6 +25,7 @@ function StudentSignupPage() {
   const [receivedOtp, setReceivedOtp] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [loading,setLoading]=useState(false);
+  const router=useRouter();
 
   const departments = [
     "Computer Science",
@@ -156,7 +158,7 @@ function StudentSignupPage() {
         progress: undefined,
         theme: "colored",
         transition: Bounce,
-        });
+      });
       setLoading(false);
       return;
     }
@@ -208,8 +210,28 @@ function StudentSignupPage() {
       });
 
       const data = await response.json();
-      setLoading(false);
-      if (data.Sucess) {
+
+      // Check if the response is successful (status code 2xx)
+      if (!data.Success) {
+        // Handle non-2xx responses
+        const errorData = await response.json();
+        toast.error(errorData.ErrorMessage || "Error during signup.", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Proceed only if data contains Success property and it's true
+      if (data.Success) {
         toast.success(data.SuccessMessage || "Successfully signed up!", {
           position: "top-center",
           autoClose: 2000,
@@ -220,9 +242,10 @@ function StudentSignupPage() {
           progress: undefined,
           theme: "colored",
           transition: Bounce,
-      });
-        // Redirect to login page after successful signup
-        router.push('/login/student');
+        });
+        setTimeout(() => {
+          router.push('/login/student');
+        }, 2000);
       } else {
         toast.error(data.ErrorMessage || "Error during signup.", {
           position: "top-center",
@@ -234,10 +257,11 @@ function StudentSignupPage() {
           progress: undefined,
           theme: "colored",
           transition: Bounce,
-      });
+        });
       }
     } catch (error) {
-      toast.error("An error occurred while signing up.", {
+      // Catch network or other errors
+      toast.error(error, {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -247,7 +271,9 @@ function StudentSignupPage() {
         progress: undefined,
         theme: "colored",
         transition: Bounce,
-    });
+      });
+    } finally {
+      setLoading(false); // Ensure loading is set to false after everything completes
     }
   };
 

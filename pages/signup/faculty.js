@@ -23,6 +23,7 @@ function SignupPage() {
   const [receivedOtp, setReceivedOtp] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [loading,setLoading]=useState(false);
+  const router=useRouter();
 
   const departments = [
     "Computer Science",
@@ -156,7 +157,7 @@ function SignupPage() {
         progress: undefined,
         theme: "colored",
         transition: Bounce,
-        });
+      });
       setLoading(false);
       return;
     }
@@ -197,8 +198,8 @@ function SignupPage() {
       });
   
       const data = await response.json();
-      setLoading(false);
-      if (response.Success) {
+  
+      if (response.ok && data.Success) {
         toast.success(data.SuccessMessage || "Successfully signed up!", {
           position: "top-center",
           autoClose: 2000,
@@ -209,9 +210,10 @@ function SignupPage() {
           progress: undefined,
           theme: "colored",
           transition: Bounce,
-      });
-        // Redirect to login page after successful signup
-        router.push('/login/faculty');
+        });
+        setTimeout(() => {
+          router.push('/login/faculty');
+        }, 2200);
       } else {
         toast.error(data.ErrorMessage || "Error during signup.", {
           position: "top-center",
@@ -223,10 +225,11 @@ function SignupPage() {
           progress: undefined,
           theme: "colored",
           transition: Bounce,
-      });
+        });
       }
+      setLoading(false); 
     } catch (error) {
-      toast.error("An error occurred while signing up.", {
+      toast.error(error, {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -236,10 +239,11 @@ function SignupPage() {
         progress: undefined,
         theme: "colored",
         transition: Bounce,
-    });
+      });
+      setLoading(false);
     }
   };
-  
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

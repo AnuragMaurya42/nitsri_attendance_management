@@ -91,7 +91,7 @@ export default function Dashboard() {
               STUDENT
             </h1>
             <h2 className="text-2xl font-bold mb-4">{user?.name || "Undefined"}</h2>
-            <p className="text-gray-400 mb-4">Enrollment: {user?.enrollment || "Undefined"}</p>
+            <p className="text-gray-400 mb-4">Enrollment: {user?.enrollmentNumber || "Undefined"}</p>
             <p className="text-gray-400 mb-4">Batch: {user?.batch || "Undefined"}</p>
           </div>
 

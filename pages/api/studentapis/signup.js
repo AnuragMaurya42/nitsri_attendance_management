@@ -16,6 +16,21 @@ const handler = async (req, res) => {
     }
 
     try {
+      // Extract the enrollment number from the email using a regular expression
+      const enrollmentNumberMatch = email.match(/(\d{4}[a-zA-Z]+[0-9]{3})/); // Pattern to extract the enrollment number
+
+      // If the enrollment number is not found, return an error
+      if (!enrollmentNumberMatch) {
+        return res.status(400).json({
+          Success: false,
+          ErrorCode: 400,
+          ErrorMessage: "Invalid email format. Enrollment number not found.",
+        });
+      }
+
+      // Extracted enrollment number
+      const enrollmentNumber = enrollmentNumberMatch[0];
+
       // Check if the student already exists
       const existingStudent = await Student.findOne({ email });
 
@@ -36,7 +51,8 @@ const handler = async (req, res) => {
           batch,
           email,
           password: hashedPassword, // Save the hashed password
-        });
+          enrollmentNumber: enrollmentNumber.toUpperCase(), // Convert enrollment number to uppercase
+        });        
 
         // Save the new student record to the database
         await newStudent.save();
