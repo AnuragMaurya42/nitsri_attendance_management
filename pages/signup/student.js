@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function StudentSignupPage() {
   const [formData, setFormData] = useState({
@@ -19,15 +21,18 @@ function StudentSignupPage() {
   });
 
   const [otpSent, setOtpSent] = useState(false);
+  const [receivedOtp, setReceivedOtp] = useState(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [loading,setLoading]=useState(false);
 
   const departments = [
     "Computer Science",
     "Information Technology",
     "Electrical Engineering",
-    "Electronics and communication engineering ",
-    "Civil engineering",
-    "Mechanical engineering",
-    "Chemical engineering",
+    "Electronics and Communication Engineering",
+    "Civil Engineering",
+    "Mechanical Engineering",
+    "Chemical Engineering",
     "Metallurgy"
   ];
 
@@ -42,32 +47,119 @@ function StudentSignupPage() {
     });
   };
 
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
+    setLoading(true);
     if (!formData.email.endsWith("@nitsri.ac.in")) {
       setErrors((prev) => ({
         ...prev,
         email: "Email must belong to the domain '@nitsri.ac.in'.",
       }));
+      setLoading(false);
       return;
     }
-    // Mock sending OTP
-    alert("OTP sent to your email!");
-    setOtpSent(true);
+
+    try {
+      const response = await fetch("/api/Utils/getCode", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+      if (response.ok) {
+        if (data.Success) {
+          setReceivedOtp(data.otp);
+        }
+        toast.success("OTP sent to your email!", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+      });
+        setOtpSent(true);
+      } else {
+        toast.error(data.ErrorMessage || "Error sending OTP.", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+      });
+      }
+    } catch (error) {
+      toast.error("An error occurred while sending OTP.", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+    });
+    }
   };
 
   const handleVerifyOtp = () => {
-    if (formData.otp !== "123456") { // Mock OTP verification
+    setLoading(true);
+    const enteredOtp = formData.otp.trim();
+    const backendOtp = String(receivedOtp).trim();
+    if (enteredOtp !== backendOtp) {
       setErrors((prev) => ({
         ...prev,
         otp: "Invalid OTP. Please try again.",
       }));
+      setLoading(false);
       return;
     }
-    alert("OTP verified successfully!");
+    setLoading(false);
+    setIsVerified(true);
+    toast.success("OTP verified successfully!", {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+  });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
+
+    // Check if OTP is verified
+    if (!isVerified) {
+      toast.warn("Please verify your email first.", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+        });
+      setLoading(false);
+      return;
+    }
 
     // Batch Validation
     if (formData.batch < 1000 || formData.batch > 9999) {
@@ -75,6 +167,7 @@ function StudentSignupPage() {
         ...prev,
         batch: "Batch must be a valid 4-digit year (e.g., 2021).",
       }));
+      setLoading(false);
       return;
     }
 
@@ -84,6 +177,7 @@ function StudentSignupPage() {
         ...prev,
         email: "Email must belong to the domain '@nitsri.ac.in'.",
       }));
+      setLoading(false);
       return;
     }
 
@@ -93,16 +187,90 @@ function StudentSignupPage() {
         ...prev,
         password: "Passwords do not match.",
       }));
+      setLoading(false);
       return;
     }
 
-    // Submit Form
-    alert("Form submitted successfully!");
-    console.log(formData);
+    try {
+      // Submit the form to the backend for user registration
+      const response = await fetch("/api/studentapis/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          department: formData.department,
+          batch: formData.batch,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+      if (response.ok) {
+        toast.success(data.SuccessMessage || "Successfully signed up!", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+      });
+        // Redirect to login page after successful signup
+        router.push('/login/student');
+      } else {
+        toast.error(data.ErrorMessage || "Error during signup.", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+      });
+      }
+    } catch (error) {
+      toast.error("An error occurred while signing up.", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+    });
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+                transition={Bounce}
+            />
+    {loading ? (
+                            <div className="relative h-custom flex justify-center items-center">
+                                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+                            </div>
+                        ) : (
       <div className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-700 mb-6">
           Student Signup
@@ -170,9 +338,8 @@ function StudentSignupPage() {
               placeholder="Enter batch year (e.g., 2021)"
               value={formData.batch}
               onChange={handleChange}
-              className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
-                errors.batch ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
-              }`}
+              className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${errors.batch ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                }`}
               required
             />
             {errors.batch && (
@@ -195,9 +362,8 @@ function StudentSignupPage() {
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
-                errors.email ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
-              }`}
+              className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${errors.email ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                }`}
               required
             />
             {errors.email && (
@@ -205,6 +371,7 @@ function StudentSignupPage() {
             )}
           </div>
 
+          {/* OTP Section */}
           {/* OTP Section */}
           {otpSent && (
             <div className="mb-4">
@@ -221,23 +388,30 @@ function StudentSignupPage() {
                 placeholder="Enter OTP"
                 value={formData.otp}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
-                  errors.otp ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
-                }`}
+                className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${errors.otp ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                  }`}
                 required
               />
               {errors.otp && (
                 <p className="text-xs text-red-500 mt-1">{errors.otp}</p>
               )}
-              <button
-                type="button"
-                onClick={handleVerifyOtp}
-                className="w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
-              >
-                Verify OTP
-              </button>
+
+              {isVerified ? (
+                <div className="w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-gray-500 rounded-md text-center">
+                  ✔️ Verified
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  className="w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
+                >
+                  Verify OTP
+                </button>
+              )}
             </div>
           )}
+
 
           {!otpSent && (
             <button
@@ -249,7 +423,7 @@ function StudentSignupPage() {
             </button>
           )}
 
-          {/* Password Input */}
+          {/* Password and Confirm Password */}
           <div className="mb-4">
             <label
               htmlFor="password"
@@ -261,15 +435,15 @@ function StudentSignupPage() {
               type="password"
               id="password"
               name="password"
-              placeholder="Enter your password"
+              placeholder="Enter password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${errors.password ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                }`}
               required
             />
           </div>
 
-          {/* Confirm Password Input */}
           <div className="mb-4">
             <label
               htmlFor="confirmPassword"
@@ -281,36 +455,23 @@ function StudentSignupPage() {
               type="password"
               id="confirmPassword"
               name="confirmPassword"
-              placeholder="Confirm your password"
+              placeholder="Confirm password"
               value={formData.confirmPassword}
               onChange={handleChange}
               className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             />
-            {errors.password && (
-              <p className="text-xs text-red-500 mt-1">{errors.password}</p>
-            )}
           </div>
 
-          {/* Signup Button */}
           <button
             type="submit"
-            className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
-            Signup
+            Sign Up
           </button>
         </form>
-
-        {/* Go to Login Page Button */}
-        <div className="mt-4 text-center">
-          <a
-            href="/login/student"
-            className="inline-block w-full px-4 py-2 text-sm font-medium text-blue-500 border border-blue-500 rounded-md hover:bg-blue-50"
-          >
-            Go to Login Page
-          </a>
-        </div>
       </div>
+                        )}
     </div>
   );
 }

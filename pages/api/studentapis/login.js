@@ -1,6 +1,6 @@
 import Student from "@/models/Student";
 import connectDb from "@/middleware/mongoose";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 const jwt = require('jsonwebtoken');
 
 const handler = async (req, res) => {
@@ -28,17 +28,8 @@ const handler = async (req, res) => {
         });
       }
 
-      // Check if email is verified
-      if (!existingStudent.email_verified) {
-        return res.status(400).json({
-          Success: false,
-          ErrorCode: 400,
-          ErrorMessage: "Email not verified. Please verify your email first.",
-        });
-      }
-
       // Verify password
-      const isPasswordValid = bcrypt.compareSync(password, existingStudent.password);
+      const isPasswordValid = await bcrypt.compare(password, existingStudent.password);
       if (!isPasswordValid) {
         return res.status(401).json({
           Success: false,
@@ -55,7 +46,7 @@ const handler = async (req, res) => {
           studentName: existingStudent.name,
         },
         process.env.NEXT_PUBLIC_JWT_SECRET3, 
-        { expiresIn: '1d' }  // Optional: Token expiry (1 day)
+        { expiresIn: '7d' }  // Optional: Token expiry (7 days)
       );
 
       return res.status(200).json({

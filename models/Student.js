@@ -6,8 +6,6 @@ const studentSchema = new mongoose.Schema({
   batch: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, trim: true },
   password: { type: String, required: true },
-  verification_code: { type: Number },
-  email_verified: { type: Boolean, default: false },
 }, { timestamps: true });
 
 const Student = mongoose.models.Student || mongoose.model("Student", studentSchema);

@@ -26,14 +26,6 @@ const handler = async (req, res) => {
         });
       }
 
-      if (!faculty.email_verified) {
-        return res.status(400).json({
-          Success: false,
-          ErrorCode: 400,
-          ErrorMessage: "Email not verified. Please verify your email first.",
-        });
-      }
-
       const isPasswordValid = await bcrypt.compare(password, faculty.password);
 
       if (!isPasswordValid) {
@@ -51,7 +43,7 @@ const handler = async (req, res) => {
           facultyName: faculty.name,
         },
         process.env.NEXT_PUBLIC_JWT_SECRET3,
-        { expiresIn: "1d" }
+        { expiresIn: "7d" }
       );
 
       return res.status(200).json({

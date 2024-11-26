@@ -1,4 +1,3 @@
-import Student from "@/models/Student";
 import connectDb from "@/middleware/mongoose";
 import nodemailer from "nodemailer";
 
@@ -18,46 +17,41 @@ const handler = async (req, res) => {
       return res.status(400).json({
         Success: false,
         ErrorCode: 400,
-        ErrorMessage: "Email is required!",
+        ErrorMessage: "Email is required.",
       });
     }
 
+    const verificationCode = Math.floor(100000 + Math.random() * 900000);
+
+    const mailOptions = {
+      from: process.env.NEXT_PUBLIC_EMAIL_USER,
+      to: email,
+      subject: "Verification Code",
+      html: `
+        <div style="border: 1px solid #ccc; background-color: #3b82f6; padding: 20px; border-radius: 8px; color: white;">
+          <p>Hi,</p>
+          <p>Here is your unique verification code to verify your account: <strong>${verificationCode}</strong>.</p>
+          <p style="color:white">We have implemented these measures as an extra layer of security, which is extremely important to us.</p>
+          <p style="color:white">Questions or concerns? Contact our support team.</p>
+          <hr>
+          <p>© NIT Srinagar, All Rights Reserved</p>
+        </div>
+      `,
+    };
+
     try {
-      const student = await Student.findOne({ email });
-
-      if (!student) {
-        return res.status(404).json({
-          Success: false,
-          ErrorCode: 404,
-          ErrorMessage: "Student not registered.",
-        });
-      }
-
-      const code = Math.floor(100000 + Math.random() * 900000); 
-
-      const mailOptions = {
-        from: process.env.NEXT_PUBLIC_EMAIL_USER,
-        to: email,
-        subject: "Verification Code",
-        html: `
-          <p>Your verification code is: <strong>${code}</strong></p>
-          <p>Please use this code to verify your account.</p>
-        `,
-      };
-
       await transporter.sendMail(mailOptions);
-
-      student.verification_code = code;
-      await student.save();
 
       return res.status(200).json({
         Success: true,
-        SuccessMessage: "Verification code sent to email.",
+        SuccessMessage: "Verification code has been sent to your email.",
+        otp:verificationCode, 
       });
     } catch (error) {
       return res.status(500).json({
         Success: false,
-        ErrorMessage: error.message || "An error occurred.",
+        ErrorCode: error.code || 500,
+        ErrorMessage: error.message || "Internal server error.",
       });
     }
   } else {

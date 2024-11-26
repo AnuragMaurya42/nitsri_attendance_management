@@ -1,13 +1,13 @@
-import Student from "@/models/Student";
+import Faculty from "@/models/Faculty";
 import connectDb from "@/middleware/mongoose";
 import bcrypt from "bcryptjs";
 
 const handler = async (req, res) => {
   if (req.method === "POST") {
-    const { name, department, batch, email, password } = req.body;
+    const { name, department, email, password } = req.body;
 
-    // Check if all fields are provided
-    if (!name || !department || !batch || !email || !password) {
+    // Check if all required fields are provided
+    if (!name || !department || !email || !password) {
       return res.status(400).json({
         Success: false,
         ErrorCode: 400,
@@ -16,10 +16,10 @@ const handler = async (req, res) => {
     }
 
     try {
-      // Check if the student already exists
-      const existingStudent = await Student.findOne({ email });
+      // Check if the faculty already exists
+      const existingFaculty = await Faculty.findOne({ email });
 
-      if (existingStudent) {
+      if (existingFaculty) {
         return res.status(409).json({
           Success: false,
           ErrorCode: 409,
@@ -29,17 +29,16 @@ const handler = async (req, res) => {
         // Hash the password before saving
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create a new student record
-        const newStudent = new Student({
+        // Create a new faculty record
+        const newFaculty = new Faculty({
           name,
           department,
-          batch,
           email,
           password: hashedPassword, // Save the hashed password
         });
 
-        // Save the new student record to the database
-        await newStudent.save();
+        // Save the new faculty record to the database
+        await newFaculty.save();
 
         return res.status(200).json({
           Success: true,
