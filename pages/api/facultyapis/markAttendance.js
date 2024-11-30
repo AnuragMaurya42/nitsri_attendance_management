@@ -2,77 +2,87 @@ import Course from "@/models/Course";
 import connectDb from "@/middleware/mongoose";
 
 const handler = async (req, res) => {
-  if (req.method === 'POST') {
+  if (req.method === "POST") {
     const { courseCode, selectedDate, attendanceStatuses } = req.body;
 
-    // Ensure all fields are provided
+    // Validation for required fields
     if (!courseCode || !selectedDate || !attendanceStatuses) {
-      return res.status(400).json({ Success: false, ErrorMessage: "All fields are required." });
+      return res
+        .status(400)
+        .json({ Success: false, ErrorMessage: "All fields are required." });
     }
 
     try {
       // Find the course by courseCode
       const course = await Course.findOne({ courseCode });
-
       if (!course) {
-        return res.status(404).json({ Success: false, ErrorMessage: "Course not found." });
+        return res
+          .status(404)
+          .json({ Success: false, ErrorMessage: "Course not found." });
       }
 
-      // Ensure the attendanceStatusofStudents is populated for all students enrolled in the course
-      const enrollmentNumbers = Object.keys(attendanceStatuses);  // Assuming `attendanceStatuses` has student enrollment numbers as keys
-      
-      // Iterate over each enrollment number and ensure the student exists in the attendanceStatusofStudents array
-      enrollmentNumbers.forEach(enrollmentNumber => {
-        // Check if the student exists in the course's attendanceStatusofStudents array
-        const student = course.attendanceStatusofStudents.find(student => student.enrollmentNumber === enrollmentNumber);
-
-        // If the student does not exist, create a new student entry
-        if (!student) {
-          course.attendanceStatusofStudents.push({
-            studentName: `Student ${enrollmentNumber}`,  // You might want to fetch the student's actual name from a student database
-            enrollmentNumber: enrollmentNumber,
-            attendance: [],
-          });
-        }
-      });
-
-      // Log course data after ensuring students are added
-      console.log("Course Data after ensuring students: ", course);
+      const enrollmentNumbers = Object.keys(attendanceStatuses);
 
       // Format the selected date
-      const formattedSelectedDate = new Date(selectedDate).toISOString().split('T')[0];
-      console.log("Formatted Selected Date: ", formattedSelectedDate);
+      const formattedSelectedDate = new Date(selectedDate);
 
-      // Update the attendance status for each student
-      course.attendanceStatusofStudents.forEach(student => {
-        // Check if there's already an attendance record for the selected date
+      // Iterate over enrollment numbers and update attendance
+      enrollmentNumbers.forEach((enrollmentNumber) => {
+        let student = course.attendanceStatusofStudents.find(
+          (s) => s.enrollmentNumber === enrollmentNumber
+        );
+
+        if (!student) {
+          // Add the student if they don't exist in the course
+          student = {
+            studentName: attendanceStatuses[enrollmentNumber].name, // Name from frontend
+            enrollmentNumber,
+            attendance: [],
+          };
+          course.attendanceStatusofStudents.push(student);
+        }
+
+        // Find if attendance for the date already exists
         const attendanceForDate = student.attendance.find(
-          att => att.date.toISOString().split('T')[0] === formattedSelectedDate
+          (att) =>
+            att.date.toISOString().split("T")[0] ===
+            formattedSelectedDate.toISOString().split("T")[0]
         );
 
         if (attendanceForDate) {
-          // Update status if attendance record is found
-          attendanceForDate.status = attendanceStatuses[student.enrollmentNumber] ? "Present" : "Absent";
+          // Update existing attendance record
+          attendanceForDate.status =
+            attendanceStatuses[enrollmentNumber].status === "1"
+              ? "Present"
+              : "Absent";
         } else {
-          // If no attendance record exists for the selected date, create a new entry
+          // Add new attendance record
           student.attendance.push({
-            date: new Date(selectedDate),  // Store date as Date object
-            status: attendanceStatuses[student.enrollmentNumber] ? "Present" : "Absent",
+            date: formattedSelectedDate,
+            status:
+              attendanceStatuses[enrollmentNumber].status === "1"
+                ? "Present"
+                : "Absent",
           });
         }
       });
 
-      // Save the course document with updated attendance
+      // Save the updated course document
       await course.save();
-      console.log("Course saved successfully with updated attendance.");
 
-      return res.status(200).json({ Success: true, Message: "Attendance marked successfully!" });
+      return res
+        .status(200)
+        .json({ Success: true, Message: "Attendance marked successfully!" });
     } catch (error) {
-      console.error("Error occurred: ", error);
-      return res.status(500).json({ Success: false, ErrorMessage: error.message });
+      console.error("Error occurred:", error);
+      return res
+        .status(500)
+        .json({ Success: false, ErrorMessage: error.message });
     }
   } else {
-    return res.status(405).json({ Success: false, ErrorMessage: "Method Not Allowed" });
+    return res
+      .status(405)
+      .json({ Success: false, ErrorMessage: "Method Not Allowed" });
   }
 };
 

@@ -1,27 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router"; // Import Next.js router
+import { useRouter } from "next/router";
 import "tailwindcss/tailwind.css";
 
-export default function TakeAttendence() {
+export default function TakeAttendance() {
   const router = useRouter();
-  const { subject } = router.query; // Get the dynamic subject from the URL
+  const { subject } = router.query;
   const [students, setStudents] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [attendanceStatuses, setAttendanceStatuses] = useState({});
   const [popupMessage, setPopupMessage] = useState("");
-  const [popupType, setPopupType] = useState("success"); // 'success' or 'error'
+  const [popupType, setPopupType] = useState("success");
 
   useEffect(() => {
-    // Fetch students based on the course (subject)
     const fetchStudents = async () => {
       if (subject) {
         const res = await fetch(`/api/facultyapis/getAllStudents`);
         const data = await res.json();
         if (data.Success) {
           setStudents(data.students);
-          // Initialize attendance statuses for students
           const initialStatuses = data.students.reduce((acc, student) => {
-            acc[student.enrollmentNumber] = false; // Default to Absent
+            acc[student.enrollmentNumber] = "0"; // Default to Absent ("0")
             return acc;
           }, {});
           setAttendanceStatuses(initialStatuses);
@@ -29,19 +27,19 @@ export default function TakeAttendence() {
       }
     };
     fetchStudents();
-  }, [subject]); // Dependency on subject to refetch when subject changes
+  }, [subject]);
 
   const handleCheckboxChange = (enrollmentNumber, checked) => {
-    setAttendanceStatuses(prev => ({
+    setAttendanceStatuses((prev) => ({
       ...prev,
-      [enrollmentNumber]: checked,
+      [enrollmentNumber]: checked ? "1" : "0", // "1" for Present, "0" for Absent
     }));
   };
 
   const handleClear = () => {
     setAttendanceStatuses(
       students.reduce((acc, student) => {
-        acc[student.enrollmentNumber] = false;
+        acc[student.enrollmentNumber] = "0"; // Reset to "Absent"
         return acc;
       }, {})
     );
@@ -55,18 +53,18 @@ export default function TakeAttendence() {
       return;
     }
 
-    const attendancePayload = students.map(student => ({
-      enrollmentNumber: student.enrollmentNumber,
-      name: student.name, // Pass the student name
-      attendanceStatus: attendanceStatuses[student.enrollmentNumber] ? "Present" : "Absent"
+    const attendancePayload = students.map((student) => ({
+      enrollmentNumber: student.enrollmentNumber, // Full enrollment number
+      name: student.name, // Student name
+      attendanceStatus: attendanceStatuses[student.enrollmentNumber], // "1" or "0"
     }));
 
     const res = await fetch("/api/facultyapis/markAttendance", {
       method: "POST",
       body: JSON.stringify({
-        courseCode: subject,  // Dynamically passed from the URL
+        courseCode: subject,
         selectedDate,
-        attendanceStatuses: attendancePayload,  // Pass the full payload with name and enrollment number
+        attendanceStatuses: attendancePayload,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -118,15 +116,20 @@ export default function TakeAttendence() {
               className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2"
             >
               <span className="text-sm w-10 text-center">{studentIndex + 1}</span>
-              <span className="text-sm flex-1">{student.enrollmentNumber.slice(-3)}</span>
+              <span className="text-sm flex-1 text-center">
+                {student.enrollmentNumber.slice(-3)} {/* Show last 3 characters */}
+              </span>
               <span className="text-sm flex-1 text-center">{student.name}</span>
               <div className="flex space-x-4">
                 <input
                   type="checkbox"
                   className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-                  checked={attendanceStatuses[student.enrollmentNumber]}
+                  checked={attendanceStatuses[student.enrollmentNumber] === "1"}
                   onChange={(e) =>
-                    handleCheckboxChange(student.enrollmentNumber, e.target.checked)
+                    handleCheckboxChange(
+                      student.enrollmentNumber,
+                      e.target.checked
+                    )
                   }
                 />
               </div>
