@@ -1,32 +1,12 @@
-import React,{useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import { useRouter } from "next/router";
 import "react-toastify/dist/ReactToastify.css";
 
-const subjects = [
-  {
-    name: "DBMS",
-    teacher: "Promod Yadav",
-    attendance: 85,
-    link: "/student/dbms",
-  },
-  {
-    name: "Mathematics",
-    teacher: "Dr. Sharma",
-    attendance: 90,
-    link: "/student/mathematics",
-  },
-  {
-    name: "Science",
-    teacher: "Dr. Kumar",
-    attendance: 75,
-    link: "/student/science",
-  },
-];
-
 export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null); // Added state for user
+  const [courses, setCourses] = useState([]); // Added state for courses
   const router = useRouter();
 
   useEffect(() => {
@@ -43,6 +23,7 @@ export default function Dashboard() {
             },
           });
           const data = await res.json();
+
           if (!data.Success) {
             localStorage.removeItem("facultyToken");
             toast.error(data.ErrorMessage, {
@@ -60,11 +41,48 @@ export default function Dashboard() {
               router.push("/login/faculty");
             }, 2000);
           } else {
-            localStorage.setItem('role',"faculty");
+            localStorage.setItem('role', "faculty");
             setUser(data.user);
+
+            // Fetch courses assigned to the faculty using the backend API
+            const coursesRes = await fetch("/api/facultyapis/getfacultycourses", {
+              method: "POST",
+              body: JSON.stringify({ _id: data.user._id }), // Send faculty _id to the API
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+            const coursesData = await coursesRes.json();
+
+            if (coursesData.Success) {
+              setCourses(coursesData.courses); // Set courses state with the response
+            } else {
+              toast.error(coursesData.ErrorMessage, {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                transition: Bounce,
+              });
+            }
           }
         } catch (error) {
           console.error(error);
+          toast.error("Something went wrong!", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            transition: Bounce,
+          });
         }
       };
       helper();
@@ -74,10 +92,9 @@ export default function Dashboard() {
     setLoading(false);
   }, [router]);
 
-
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
-     <ToastContainer
+      <ToastContainer
         position="top-center"
         autoClose={5000}
         hideProgressBar={false}
@@ -96,49 +113,54 @@ export default function Dashboard() {
         </div>
       ) : (
         <div>
-      <div className="bg-gray-800 shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
-        <h1
-          className="text-5xl font-bold text-green-500 mb-5"
-          style={{
-            fontFamily: "Courier New, Courier, monospace",
-            color: "rbg(34 197 50)",
-          }}
-        >
-          Faculty
-        </h1>
-        <h2 className="text-2xl font-bold mb-4">{user?.name}</h2>
-        <p className="text-gray-400 mb-4">Department: {user?.department}</p>
-      </div>
-
-      {subjects.map((subject, index) => (
-        <div
-          key={index}
-          className="w-4/5 bg-gray-800 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 mb-6 mx-auto"
-        >
-          <div className="flex justify-end px-4 pt-4"></div>
-          <div className="flex flex-col items-center pb-10">
-            <h5 className="mb-1 text-xl font-medium text-gray-100">
-              {subject.name}
-            </h5>
-            <span className="text-sm text-gray-400">{subject.teacher}</span>
-
-            <a href={`/faculty/takeAttendence/${subject.name}`} >
-              <button className="mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                Take Attendence
-              </button>
-            </a>
-            <a href={`/faculty/showSummary/${subject.name}`} >
-            <button
-              onClick={() => (window.location.href = subject.link)}
-              className="mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          <div className="bg-gray-800 shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
+            <h1
+              className="text-5xl font-bold text-green-500 mb-5"
+              style={{
+                fontFamily: "Courier New, Courier, monospace",
+                color: "rgb(34 197 50)",
+              }}
             >
-              Show Summary
-            </button>
-            </a>
+              Faculty
+            </h1>
+            <h2 className="text-2xl font-bold mb-4">{user?.name}</h2>
+            <p className="text-gray-400 mb-4">Department: {user?.department}</p>
           </div>
+
+          {courses.length === 0 ? (
+            <div className="text-center text-gray-400 text-xl">
+              No courses are assigned to you.
+            </div>
+          ) : (
+            courses.map((course, index) => (
+              <div
+                key={index}
+                className="w-4/5 bg-gray-800 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 mb-6 mx-auto"
+              >
+                <div className="flex justify-end px-4 pt-4"></div>
+                <div className="flex flex-col items-center pb-10">
+                  <h5 className="mb-1 text-xl font-medium text-gray-100">
+                    {course.courseName}
+                  </h5>
+                  <span className="text-sm text-gray-400">{course.courseFaculty}</span>
+
+                  <a href={`/faculty/takeAttendence/${course.courseCode}`} >
+                    <button className="mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                      Take Attendance
+                    </button>
+                  </a>
+                  <a href={`/faculty/showSummary/${course.courseCode}`} >
+                    <button
+                      className="mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                      Show Summary
+                    </button>
+                  </a>
+                </div>
+              </div>
+            ))
+          )}
         </div>
-      ))}
-      </div>
       )}
     </div>
   );

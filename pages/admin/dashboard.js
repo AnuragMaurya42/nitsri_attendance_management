@@ -1,191 +1,367 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import "react-toastify/dist/ReactToastify.css";
-import { useRouter } from "next/router";
-import { ToastContainer, toast } from "react-toastify"; 
-
-const subjects = [
-  { name: "DBMS", courseCode: "304" },
-  { name: "Mathematics", courseCode: "102" },
-  { name: "Science", courseCode: "567" },
-];
+import { ToastContainer, toast, Bounce } from "react-toastify";
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [showAddCourseModal, setShowAddCourseModal] = useState(false);
+  const [showDeleteCourseModal, setShowDeleteCourseModal] = useState(false);
   const [newCourseName, setNewCourseName] = useState("");
   const [newCourseCode, setNewCourseCode] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null); // Added state for user
-  const router = useRouter();
-
-  const filteredSubjects = subjects.filter(
-    (subject) =>
-      subject.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      subject.courseCode.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleAddCourse = () => {
-    subjects.push({ name: newCourseName, courseCode: newCourseCode });
-    setShowModal(false);
-    setNewCourseName("");
-    setNewCourseCode("");
-    toast.success(
-      `Course: ${newCourseName}, Course Code: ${newCourseCode} added successfully!`
-    );
-  };
+  const [selectedCourseCode, setSelectedCourseCode] = useState(null); // To store the course to be deleted
 
   useEffect(() => {
-    setLoading(true);
-    if (localStorage.getItem("adminToken")) {
-      let token = localStorage.getItem("adminToken");
-      const helper = async () => {
-        try {
-          const res = await fetch("/api/adminapis/getadmin", {
-            method: "POST",
-            body: JSON.stringify({ token }), // Wrapped token in an object
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          const data = await res.json();
-          if (!data.Success) {
-            localStorage.removeItem("adminToken");
-            toast.error(data.ErrorMessage, {
-              position: "top-center",
-              autoClose: 2000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "colored",
-              transition: Bounce,
-            });
-            setTimeout(() => {
-              router.push("/login/admin");
-            }, 2000);
-          } else {
-            localStorage.setItem('role',"admin");
-            setUser(data.user);
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
-      helper();
-    } else {
-      router.push("/login/admin");
-    }
-    setLoading(false);
-  }, [router]);
+    const fetchAdminInfo = async () => {
+      try {
+        const res = await fetch("/api/adminapis/getadmin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: localStorage.getItem("adminToken") }),
+        });
 
+        const data = await res.json();
+        if (data.Success) {
+          setUser(data.user);
+        } else {
+          toast.error(data.ErrorMessage, {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            transition: Bounce,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching admin info:", error);
+      }
+    };
+
+    const fetchCourses = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/adminapis/getCourses");
+        const data = await res.json();
+        if (data.Success) {
+          setLoading(false);
+          setCourses(data.courses);
+        } else {
+          setLoading(false);
+          toast.error(data.ErrorMessage, {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            transition: Bounce,
+          });
+        }
+      } catch (error) {
+        setLoading(false);
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    fetchAdminInfo();
+    fetchCourses();
+    setLoading(false);
+  }, []);
+
+  // Function to add a new course
+  const handleAddCourse = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/adminapis/addCourse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseName: newCourseName, courseCode: newCourseCode }),
+      });
+
+      const data = await res.json();
+
+      if (data.Success) {
+        setLoading(false);
+        setCourses((prevCourses) => [...prevCourses, data.course]); // Add new course to state
+        setShowAddCourseModal(false);
+        setNewCourseName("");
+        setNewCourseCode("");
+        toast.success("Course added successfully!", {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+      } else {
+        setLoading(false);
+        toast.error(data.ErrorMessage);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error adding course:", error);
+      toast.error("Failed to add course. Try again later.", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+      });
+    }
+  };
+
+  // Function to delete course
+  const handleDeleteCourse = async () => {
+    if (!selectedCourseCode) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch("/api/adminapis/deleteCourse", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseCode: selectedCourseCode }),
+      });
+
+      const data = await res.json();
+
+      if (data.Success) {
+        setCourses(courses.filter(course => course.courseCode !== selectedCourseCode)); // Remove deleted course from state
+        setShowDeleteCourseModal(false);
+        toast.success(data.message, {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+      } else {
+        toast.error(data.ErrorMessage, {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error deleting course:", error);
+      toast.error("Failed to delete course. Try again later.", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+      });
+    }
+  };
+
+  // Filter courses based on the search query
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.courseCode.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
-      <ToastContainer ></ToastContainer>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Bounce}
+      />
       {loading ? (
         <div className="relative h-custom flex justify-center items-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
         </div>
       ) : (
-        <div>
-      <div className="bg-gray-800 shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
-        <h1
-          className="text-5xl font-bold text-green-500 mb-5"
-          style={{
-            fontFamily: "Courier New, Courier, monospace",
-            color: "rgb(34 197 50)",
-          }}
-        >
-          Admin
-        </h1>
-        <h2 className="text-2xl font-bold mb-4">Mohammad Chisti</h2>
-        <p className="text-gray-400 mb-4">Department: Computer Science</p>
-      </div>
+        <>
+          <div className="bg-gray-800 shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
+            <h1 className="text-5xl font-bold text-green-500 mb-5">Admin</h1>
+            {user ? (
+              <>
+                <h2 className="text-2xl font-bold mb-4">{user.adminName}</h2>
+                <p className="text-gray-400 mb-4">Department: {user.department}</p>
+                <p className="text-gray-400 mb-4">Email: {user.email}</p>
+              </>
+            ) : (
+              <p className="text-gray-400 mb-4">Loading admin info...</p>
+            )}
+          </div>
 
-      <div className="w-4/5 bg-gray-800 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 mb-6 mx-auto p-4">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by subject name or course code"
-          className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-          style={{ color: "black" }}
-        />
-      </div>
+          <div className="w-4/5 bg-gray-800 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 mb-6 mx-auto p-4">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by course name or course code"
+              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              style={{ color: "black" }}
+            />
+          </div>
 
-      <div className="w-4/5 mx-auto flex justify-around mb-6">
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
-        >
-          Add Course
-        </button>
-      </div>
-
-      {filteredSubjects.map((subject, index) => (
-        <div
-          key={index}
-          className="w-4/5 bg-gray-800 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 mb-6 mx-auto"
-        >
-          <div className="flex justify-end px-4 pt-4"></div>
-          <div className="flex flex-col items-center pb-10">
-            <h5 className="mb-1 text-xl font-medium text-gray-100">
-              {subject.name}
-            </h5>
-            <span className="text-sm text-gray-400">
-              Course-Code: {subject.courseCode}
-            </span>
-            <a href={`/faculty/takeAttendence/${subject.name}`}>
-              <button className="mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                Choose Faculty
-              </button>
-            </a>
-            <button className="mt-4 px-4 py-2 text-white bg-yellow-500 rounded-lg hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-blue-300">
-              Update Course
+          {/* Add Course Button */}
+          <div className="flex justify-center items-center mb-4">
+            <button
+              onClick={() => setShowAddCourseModal(true)}
+              className="w-40 p-2 bg-green-500 text-white rounded-md"
+            >
+              Add New Course
             </button>
           </div>
-        </div>
-      ))}
 
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Add New Course</h2>
-            <input
-              type="text"
-              value={newCourseName}
-              onChange={(e) => setNewCourseName(e.target.value)}
-              placeholder="Course Name"
-              className="w-full px-4 py-2 mb-4 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ color: "black" }}
-            />
-            <input
-              type="text"
-              value={newCourseCode}
-              onChange={(e) => setNewCourseCode(e.target.value)}
-              placeholder="Course Code"
-              className="w-full px-4 py-2 mb-4 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ color: "black" }}
-            />
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={handleAddCourse}
-                className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+
+          {/* Add Course Modal */}
+          {showAddCourseModal && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+              onClick={() => setShowAddCourseModal(false)}
+            >
+              <div
+                className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md"
+                onClick={(e) => e.stopPropagation()}
               >
-                Save
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
-              >
-                Cancel
-              </button>
+                <h2 className="text-2xl font-bold mb-4">Add Course</h2>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    value={newCourseName}
+                    onChange={(e) => setNewCourseName(e.target.value)}
+                    placeholder="Course Name"
+                    className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                  />
+                </div>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    value={newCourseCode}
+                    onChange={(e) => setNewCourseCode(e.target.value)}
+                    placeholder="Course Code"
+                    className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-4">
+                  <button
+                    onClick={handleAddCourse}
+                    className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setShowAddCourseModal(false)}
+                    className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>0
-        </div>
-      )}
-      </div>
+          )}
+
+          {/* Courses List */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredCourses.map((course) => (
+              <div
+                key={course._id}
+                className="bg-gray-800 p-4 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700"
+              >
+                <h3 className="text-xl font-semibold text-green-500">{course.courseName}</h3>
+                <p className="text-gray-400">Code: {course.courseCode}</p>
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => {/* Your code for update course */ }}
+                    className="w-40 m-1 px-4 py-2 text-white bg-yellow-500 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                  >
+                    <Link href={`/admin/update/${course._id}/${user.department}`}>
+                      Update Course
+                    </Link>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSelectedCourseCode(course.courseCode);
+                      setShowDeleteCourseModal(true);
+                    }}
+                    className="w-40 m-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                  >
+                    Delete Course
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+
+          {/* Confirmation Modal for Deletion */}
+          {showDeleteCourseModal && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+              onClick={() => setShowDeleteCourseModal(false)}
+            >
+              <div
+                className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 className="text-xl mt-4 font-bold mb-4">
+                  Do you really want to delete the course and its associated data?
+                </h2>
+                <div className="flex justify-end space-x-4">
+                  <button
+                    onClick={handleDeleteCourse}
+                    className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+                  >
+                    {loading ? 'Deleting...' : 'OK'}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteCourseModal(false)}
+                    className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
