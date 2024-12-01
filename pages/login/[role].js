@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -213,20 +213,19 @@ function LoginPage() {
 
   useEffect(() => {
     setLoading(true);
-    if (role=='admin' && localStorage.getItem('adminToken')) {
+    if (role === 'admin' && localStorage.getItem('adminToken')) {
       setLoading(false);
       router.push("/admin/dashboard");
-    }
-    else if (role=='student' && localStorage.getItem('studentToken')) {
+    } else if (role === 'student' && localStorage.getItem('studentToken')) {
       setLoading(false);
       router.push("/student/dashboard");
-    }
-    else if (role=='faculty' && localStorage.getItem('facultyToken')) {
+    } else if (role === 'faculty' && localStorage.getItem('facultyToken')) {
       setLoading(false);
       router.push("/faculty/dashboard");
     }
     setLoading(false);
-  }, [])
+  }, [role, router]);
+  
 
 
   return (
@@ -315,8 +314,9 @@ function LoginPage() {
               onClick={handleSignupRedirect}
               className="inline-block w-full px-4 py-2 text-sm font-medium text-blue-500 border border-blue-500 rounded-md hover:bg-blue-50"
             >
-              Don't have an account?
+              Don&apos;t have an account?
             </button>
+
           </div>
         </div>
       )}
