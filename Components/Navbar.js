@@ -21,10 +21,10 @@ export default function Navbar() {
     const isRoot = router.pathname === "/";
 
     return (
-        <nav className="bg-gray-800 p-4 flex items-center">
+        <nav className="bg-gray-800 p-4 flex items-center justify-between flex-wrap">
             {/* Home Button, only shown if the current route is not the root */}
             {!isRoot && (
-                <div className="flex items-center cursor-pointer" onClick={() => router.push('/')}>
+                <div className="flex items-center cursor-pointer mb-4 sm:mb-0" onClick={() => router.push('/')}>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -44,11 +44,11 @@ export default function Navbar() {
             )}
 
             {/* Center Circular Logo */}
-            <div className="flex-grow flex justify-center">
+            <div className="flex-grow flex justify-center mb-4 sm:mb-0">
                 <img
                     src="/logo.png" // Correct usage of the imported logo
                     alt="Logo"
-                    className="h-10 w-100 "
+                    className="h-10 w-auto" // Make sure the logo resizes appropriately
                 />
             </div>
 
