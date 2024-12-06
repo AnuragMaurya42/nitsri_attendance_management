@@ -19,6 +19,7 @@ function AttendanceSummaryPage() {
         try {
           const response = await axios.post("/api/facultyapis/getAttendances", { courseCode });
           if (response.data.Success) {
+            console.log(response.data.attendanceRecords);
             setAttendanceRecords(response.data.attendanceRecords);
           } else {
             console.error(response.data.ErrorMessage);

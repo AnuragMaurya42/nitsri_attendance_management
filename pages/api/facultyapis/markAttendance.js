@@ -51,11 +51,7 @@ const handler = async (req, res) => {
 
       // Initialize attendance for all students if attendance is missing
       // Now, initialize attendance for all students listed in attendanceStatuses
-      attendanceRecord = course.attendanceStatusofStudents.find(
-        (record) =>
-          record.date.toISOString().split("T")[0] ===
-            formattedSelectedDate.toISOString().split("T")[0] 
-        );
+      
       
       console.log(attendanceStatuses);
       for (let status of attendanceStatuses) {
