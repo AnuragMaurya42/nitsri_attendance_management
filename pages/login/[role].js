@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import image from './images.png';
+import image from "./images.png";
 
 function LoginPage() {
   const router = useRouter();
@@ -211,32 +211,30 @@ function LoginPage() {
     setLoading(false);
   };
 
-
   useEffect(() => {
     setLoading(true);
-    if (role === 'admin' && localStorage.getItem('adminToken')) {
+    if (role === "admin" && localStorage.getItem("adminToken")) {
       setLoading(false);
       router.push("/admin/dashboard");
-    } else if (role === 'student' && localStorage.getItem('studentToken')) {
+    } else if (role === "student" && localStorage.getItem("studentToken")) {
       setLoading(false);
       router.push("/student/dashboard");
-    } else if (role === 'faculty' && localStorage.getItem('facultyToken')) {
+    } else if (role === "faculty" && localStorage.getItem("facultyToken")) {
       setLoading(false);
       router.push("/faculty/dashboard");
     }
     setLoading(false);
   }, [role, router]);
-  
-
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100"   style={{
-    
-      backgroundImage: `url(${image.src})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }}>
-      
+    <div
+      className="flex items-center justify-center min-h-screen bg-gray-100"
+      style={{
+        backgroundImage: `url(${image.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <ToastContainer
         position="top-center"
         autoClose={5000}
@@ -255,11 +253,23 @@ function LoginPage() {
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
         </div>
       ) : (
-        <div className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md"   style={{ backgroundColor: "rgb(0 0 0 / 0%)" }}>
+        <div
+          className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md"
+          style={{ backgroundColor: "rgb(0 0 0 / 0%)" }}
+        >
+          <div className="mb-5 flex justify-center h-25">
+            <img
+              src="/images.png" // Correct usage of the imported logo
+              alt="Logo"
+              className="rounded-full"
+              
+            />
+          </div>
+
           <h2 className="text-2xl font-bold  text-center text-white mb-6">
-          {role
-      ? `${role.charAt(0).toUpperCase()}${role.slice(1)} Login`
-      : "Login"}
+            {role
+              ? `${role.charAt(0).toUpperCase()}${role.slice(1)} Login`
+              : "Login"}
           </h2>
           <form>
             <div className="mb-4">
@@ -303,7 +313,7 @@ function LoginPage() {
             <div className="mb-4 text-right ">
               <a
                 href="/forgot-password"
-                className="text-lg font-medium text-white hover:underline"
+                className="text-lg font-bold text-blue-500 border-2 bg-blue-200 rounded-full  hover:underline"
               >
                 Forgot Password?
               </a>
@@ -318,14 +328,17 @@ function LoginPage() {
             </button>
           </form>
           <div className="mt-4 text-center">
-            { role!=='admin' ? <button
-              onClick={handleSignupRedirect}
-              className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-               Don't have an account?
-            </button> : " " }
+            {role !== "admin" ? (
+              <button
+                onClick={handleSignupRedirect}
+                className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                Don't have an account?
+              </button>
+            ) : (
+              " "
+            )}
           </div>
-
         </div>
       )}
     </div>

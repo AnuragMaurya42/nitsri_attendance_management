@@ -46,9 +46,9 @@ export default function Navbar() {
             {/* Center Circular Logo */}
             <div className="flex-grow flex justify-center">
                 <img
-                    src="/logo.jpg" // Correct usage of the imported logo
+                    src="/logo.png" // Correct usage of the imported logo
                     alt="Logo"
-                    className="h-10 w-10 rounded-full object-cover"
+                    className="h-10 w-100 "
                 />
             </div>
 
