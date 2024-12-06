@@ -5,8 +5,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null); 
-  const [courses, setCourses] = useState([]); 
+  const [user, setUser] = useState(null);
+  const [courses, setCourses] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function Dashboard() {
         try {
           const res = await fetch("/api/studentapis/getStudent", {
             method: "POST",
-            body: JSON.stringify({ token }), 
+            body: JSON.stringify({ token }),
             headers: {
               "Content-Type": "application/json",
             },
@@ -40,9 +40,9 @@ export default function Dashboard() {
               router.push("/login/student");
             }, 2000);
           } else {
-            localStorage.setItem('role',"student");
+            localStorage.setItem('role', "student");
             setUser(data.user);
-            
+
             const coursesRes = await fetch("/api/studentapis/fetchUpgoingCoures", {
               method: "GET",
               headers: {
@@ -51,7 +51,7 @@ export default function Dashboard() {
             });
             const coursesData = await coursesRes.json();
             if (coursesData.Success) {
-              setCourses(coursesData.courses); 
+              setCourses(coursesData.courses);
             } else {
               toast.error(coursesData.ErrorMessage, {
                 position: "top-center",
@@ -127,23 +127,15 @@ export default function Dashboard() {
                 <div className="flex flex-col items-center pb-10">
                   <h5 className="mb-1 text-xl font-medium text-gray-100">{course.courseName}</h5>
                   <span className="text-sm text-gray-400">{course.courseFaculty}</span>
-                  <span className="text-lg font-semibold text-gray-100 mt-2">
-                    Attendance: {course.attendancePercentage || 0}% 
-                  </span>
                   <div className="relative pt-1 w-4/5 mt-2">
-                    <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-700">
-                      <div
-                        style={{ width: `${course.attendancePercentage || 0}% ` }}
-                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
-                      ></div>
-                    </div>
                   </div>
                   <button
-                    onClick={() => (window.location.href = `/student/${course.courseCode}`)}
+                    onClick={() => (window.location.href = `/student/${course.courseCode}?course=${course.courseName}&enroll=${user.enrollmentNumber}`)}
                     className="mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   >
                     Go to {course.courseName}
                   </button>
+
                 </div>
               </div>
             ))

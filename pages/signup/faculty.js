@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useRouter } from 'next/router';
-import { ToastContainer, toast, Bounce } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useRouter } from "next/router";
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import image from "./images.png";
 
 function SignupPage() {
   const [formData, setFormData] = useState({
@@ -22,8 +23,8 @@ function SignupPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [receivedOtp, setReceivedOtp] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
-  const [loading,setLoading]=useState(false);
-  const router=useRouter();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const departments = [
     "Computer Science",
@@ -33,7 +34,7 @@ function SignupPage() {
     "Civil engineering",
     "Mechanical engineering",
     "Chemical engineering",
-    "Metallurgy"
+    "Metallurgy",
   ];
 
   const handleChange = (e) => {
@@ -83,7 +84,7 @@ function SignupPage() {
           progress: undefined,
           theme: "colored",
           transition: Bounce,
-      });
+        });
         setOtpSent(true);
       } else {
         toast.error(data.ErrorMessage || "Error sending OTP.", {
@@ -96,7 +97,7 @@ function SignupPage() {
           progress: undefined,
           theme: "colored",
           transition: Bounce,
-      });
+        });
       }
     } catch (error) {
       toast.error("An error occurred while sending OTP.", {
@@ -109,7 +110,7 @@ function SignupPage() {
         progress: undefined,
         theme: "colored",
         transition: Bounce,
-    });
+      });
     }
   };
 
@@ -137,14 +138,13 @@ function SignupPage() {
       progress: undefined,
       theme: "colored",
       transition: Bounce,
-  });
+    });
   };
-
 
   const handleSubmit = async (e) => {
     setLoading(true);
     e.preventDefault();
-  
+
     // Check if OTP is verified
     if (!isVerified) {
       toast.warn("Please verify your email first.", {
@@ -161,7 +161,7 @@ function SignupPage() {
       setLoading(false);
       return;
     }
-  
+
     // Email Validation
     if (!formData.email.endsWith("@nitsri.ac.in")) {
       setErrors((prev) => ({
@@ -171,7 +171,7 @@ function SignupPage() {
       setLoading(false);
       return;
     }
-  
+
     // Password Validation
     if (formData.password !== formData.confirmPassword) {
       setErrors((prev) => ({
@@ -181,7 +181,7 @@ function SignupPage() {
       setLoading(false);
       return;
     }
-  
+
     try {
       // Submit the form to the backend for user registration
       const response = await fetch("/api/facultyapis/signup", {
@@ -196,9 +196,9 @@ function SignupPage() {
           password: formData.password,
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok && data.Success) {
         toast.success(data.SuccessMessage || "Successfully signed up!", {
           position: "top-center",
@@ -212,7 +212,7 @@ function SignupPage() {
           transition: Bounce,
         });
         setTimeout(() => {
-          router.push('/login/faculty');
+          router.push("/login/faculty");
         }, 2200);
       } else {
         toast.error(data.ErrorMessage || "Error during signup.", {
@@ -227,7 +227,7 @@ function SignupPage() {
           transition: Bounce,
         });
       }
-      setLoading(false); 
+      setLoading(false);
     } catch (error) {
       toast.error(error, {
         position: "top-center",
@@ -244,206 +244,232 @@ function SignupPage() {
     }
   };
 
+  const handleLogninRedirect = () => {
+    router.push("/login/faculty");
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-    <ToastContainer
-                position="top-center"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="colored"
-                transition={Bounce}
-            />
-    {loading ? (
-                            <div className="relative h-custom flex justify-center items-center">
-                                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-                            </div>
-                        ) : (
-      <div className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-700 mb-6">
-          Faculty Signup
-        </h2>
-        <form onSubmit={handleSubmit}>
-          {/* Name Input */}
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-600 mb-2"
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              placeholder="Enter your name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-            />
-          </div>
-
-          {/* Department Dropdown */}
-          <div className="mb-4">
-            <label
-              htmlFor="department"
-              className="block text-sm font-medium text-gray-600 mb-2"
-            >
-              Department
-            </label>
-            <select
-              id="department"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-            >
-              <option value="" disabled>
-                Select your department
-              </option>
-              {departments.map((dept, index) => (
-                <option key={index} value={dept}>
-                  {dept}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Email Input */}
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-600 mb-2"
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${errors.email ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
-                }`}
-              required
-            />
-            {errors.email && (
-              <p className="text-xs text-red-500 mt-1">{errors.email}</p>
-            )}
-          </div>
-
-          {/* OTP Section */}
-          {otpSent && (
+    <div
+      className="flex items-center justify-center min-h-screen bg-gray-100"
+      style={{
+        backgroundImage: `url(${image.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Bounce}
+      />
+      {loading ? (
+        <div className="relative h-custom flex justify-center items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      ) : (
+        <div
+          className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md"
+          style={{ backgroundColor: "rgb(0 0 0 / 0%)" }}
+        >
+          <h2 className="text-2xl font-bold text-center text-gray-700 mb-6">
+            Faculty Signup
+          </h2>
+          <form onSubmit={handleSubmit}>
+            {/* Name Input */}
             <div className="mb-4">
               <label
-                htmlFor="otp"
-                className="block text-sm font-medium text-gray-600 mb-2"
+                htmlFor="name"
+                className="block text-lg text-white font-medium  mb-2"
               >
-                OTP
+                Name
               </label>
               <input
                 type="text"
-                id="otp"
-                name="otp"
-                placeholder="Enter OTP"
-                value={formData.otp}
+                id="name"
+                name="name"
+                placeholder="Enter your name"
+                value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${errors.otp ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
-                  }`}
+                className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               />
-              {errors.otp && (
-                <p className="text-xs text-red-500 mt-1">{errors.otp}</p>
-              )}
+            </div>
 
-              {isVerified ? (
-                <div className="w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-gray-500 rounded-md text-center">
-                  ✔️ Verified
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleVerifyOtp}
-                  className="w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
-                >
-                  Verify OTP
-                </button>
+            {/* Department Dropdown */}
+            <div className="mb-4">
+              <label
+                htmlFor="department"
+                className="block text-lg text-white font-medium  mb-2"
+              >
+                Department
+              </label>
+              <select
+                id="department"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required
+              >
+                <option value="" disabled>
+                  Select your department
+                </option>
+                {departments.map((dept, index) => (
+                  <option key={index} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Email Input */}
+            <div className="mb-4">
+              <label
+                htmlFor="email"
+                className="block text-lg text-white font-medium  mb-2"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
+                  errors.email
+                    ? "border-red-500 focus:ring-red-400"
+                    : "focus:ring-blue-400"
+                }`}
+                required
+              />
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">{errors.email}</p>
               )}
             </div>
-          )}
 
+            {/* OTP Section */}
+            {otpSent && (
+              <div className="mb-4">
+                <label
+                  htmlFor="otp"
+                  className="block text-lg text-white font-medium  mb-2"
+                >
+                  OTP
+                </label>
+                <input
+                  type="text"
+                  id="otp"
+                  name="otp"
+                  placeholder="Enter OTP"
+                  value={formData.otp}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 ${
+                    errors.otp
+                      ? "border-red-500 focus:ring-red-400"
+                      : "focus:ring-blue-400"
+                  }`}
+                  required
+                />
+                {errors.otp && (
+                  <p className="text-xs text-red-500 mt-1">{errors.otp}</p>
+                )}
 
-          {!otpSent && (
-            <button
-              type="button"
-              onClick={handleSendOtp}
-              className="w-full mb-4 px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              Send OTP
-            </button>
-          )}
-
-          {/* Password Input */}
-          <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-600 mb-2"
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-            />
-          </div>
-
-          {/* Confirm Password Input */}
-          <div className="mb-4">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-600 mb-2"
-            >
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-            />
-            {errors.password && (
-              <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+                {isVerified ? (
+                  <div className="w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-gray-500 rounded-md text-center">
+                    ✔️ Verified
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleVerifyOtp}
+                    className="w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  >
+                    Verify OTP
+                  </button>
+                )}
+              </div>
             )}
-          </div>
 
-          <button
-            type="submit"
-            className="w-full mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            Signup
-          </button>
-        </form>
-      </div>
-                        )}
+            {!otpSent && (
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                className="w-full mb-4 px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                Send OTP
+              </button>
+            )}
+
+            {/* Password Input */}
+            <div className="mb-4">
+              <label
+                htmlFor="password"
+                className="block text-lg text-white font-medium  mb-2"
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required
+              />
+            </div>
+
+            {/* Confirm Password Input */}
+            <div className="mb-4">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-lg text-white font-medium  mb-2"
+              >
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required
+              />
+              {errors.password && (
+                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              Signup
+            </button>
+          </form>
+          <div className="mt-4 text-center">
+            <button
+              onClick={handleLogninRedirect}
+              className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              Click here to sign in!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

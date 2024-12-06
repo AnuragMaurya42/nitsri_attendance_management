@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import image from './images.png';
 
 function LoginPage() {
   const router = useRouter();
@@ -229,7 +230,13 @@ function LoginPage() {
 
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100"   style={{
+    
+      backgroundImage: `url(${image.src})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    }}>
+      
       <ToastContainer
         position="top-center"
         autoClose={5000}
@@ -248,15 +255,17 @@ function LoginPage() {
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
         </div>
       ) : (
-        <div className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-center text-gray-700 mb-6">
-            Login
+        <div className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md"   style={{ backgroundColor: "rgb(0 0 0 / 0%)" }}>
+          <h2 className="text-2xl font-bold  text-center text-white mb-6">
+          {role
+      ? `${role.charAt(0).toUpperCase()}${role.slice(1)} Login`
+      : "Login"}
           </h2>
           <form>
             <div className="mb-4">
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-600 mb-2"
+                className="block text-lg font-medium text-white mb-2"
               >
                 Email
               </label>
@@ -275,7 +284,7 @@ function LoginPage() {
             <div className="mb-4">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-600 mb-2"
+                className="block text-lg font-medium text-white mb-2"
               >
                 Password
               </label>
@@ -291,10 +300,10 @@ function LoginPage() {
               />
             </div>
 
-            <div className="mb-4 text-right">
+            <div className="mb-4 text-right ">
               <a
                 href="/forgot-password"
-                className="text-sm text-blue-500 hover:underline"
+                className="text-lg font-medium text-white hover:underline"
               >
                 Forgot Password?
               </a>
@@ -303,21 +312,20 @@ function LoginPage() {
             <button
               type="submit"
               onClick={handleClick}
-              className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 text-lg font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               Login
             </button>
           </form>
-
           <div className="mt-4 text-center">
-            <button
+            { role!=='admin' ? <button
               onClick={handleSignupRedirect}
-              className="inline-block w-full px-4 py-2 text-sm font-medium text-blue-500 border border-blue-500 rounded-md hover:bg-blue-50"
+              className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-              Don&apos;t have an account?
-            </button>
-
+               Don't have an account?
+            </button> : " " }
           </div>
+
         </div>
       )}
     </div>
