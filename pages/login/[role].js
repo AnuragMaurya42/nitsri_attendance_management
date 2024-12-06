@@ -313,7 +313,7 @@ function LoginPage() {
             <div className="mb-4 text-right ">
               <a
                 href="/forgot-password"
-                className="text-lg font-medium text-white hover:underline"
+                className="text-lg font-bold text-blue-500 border-2 bg-blue-200 rounded-full  hover:underline"
               >
                 Forgot Password?
               </a>
