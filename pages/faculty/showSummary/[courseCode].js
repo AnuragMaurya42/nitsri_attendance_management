@@ -18,11 +18,10 @@ function AttendanceSummaryPage() {
       if (courseCode) {
         try {
           const response = await axios.post("/api/facultyapis/getAttendances", { courseCode });
-          const receivedData=await response.json();
-          if (receivedData.Success) {
-            setAttendanceRecords(receivedData.attendanceRecords);
+          if (response.data.Success) {
+            setAttendanceRecords(response.data.attendanceRecords);
           } else {
-            console.error(receivedData.ErrorMessage);
+            console.error(response.data.ErrorMessage);
           }
         } catch (error) {
           console.error("Error fetching attendance records:", error.message);
@@ -31,7 +30,6 @@ function AttendanceSummaryPage() {
     };
 
     fetchAttendanceRecords();
-    console.log(attendanceRecords);
   }, [courseCode]);
 
   // Filter students based on date range and percent
