@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import image from './images.png';
 
 export default function Home() {
   const router = useRouter();
@@ -11,7 +12,9 @@ export default function Home() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f3f4f6", // Tailwind's bg-gray-100 equivalent
+        backgroundImage: `url(${image.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         padding: "3rem",
       }}
     >
@@ -30,7 +33,7 @@ export default function Home() {
             width: "100%",
             height:"60px",
             color: "white",
-            backgroundColor: "#28a745",
+            backgroundColor: "rgb(0 244 56)",
 
             border: "none",
             borderRadius: "1rem",
@@ -51,7 +54,7 @@ export default function Home() {
             width: "100%",
             height:"60px",
             color: "white",
-            backgroundColor: "#28a745",
+            backgroundColor: "rgb(0 244 56)",
             border: "none",
             borderRadius: "1rem",
             fontWeight: "500",
@@ -71,7 +74,7 @@ export default function Home() {
             width: "100%",
             height:"60px",
             color: "white",
-            backgroundColor: "#28a745",
+            backgroundColor: "rgb(0 244 56)",
             border: "none",
             borderRadius: "1rem",
             fontWeight: "500",
