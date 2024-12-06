@@ -4,6 +4,7 @@ import connectDb from "@/middleware/mongoose";
 const handler = async (req, res) => {
   if (req.method === "POST") {
     try {
+        console.log(req.body)
       const { courseCode, enrollmentNumber } = req.body;
 
       // Validate the input

@@ -8,10 +8,11 @@ function AttendanceSummaryPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [percentFilter, setPercentFilter] = useState("");
-  const [attendanceRecords, setAttendanceRecords] = useState([]); // State for fetched attendance data
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [isPercentageChecked, setIsPercentageChecked] = useState(false);
   const router = useRouter();
-  const { courseCode } = router.query; // Assuming courseCode is passed as a query param
-  const subject="default";
+  const { courseCode } = router.query;
 
   useEffect(() => {
     const fetchAttendanceRecords = async () => {
@@ -33,23 +34,83 @@ function AttendanceSummaryPage() {
     fetchAttendanceRecords();
   }, [courseCode]);
 
-  // Filter students based on date range and percent
-  const filteredStudents = attendanceRecords
-    .flatMap((record) => record.attendances.map((attendance) => ({
+  // Flatten and process attendance records
+  const flattenedRecords = attendanceRecords.flatMap((record) =>
+    record.attendances.map((attendance) => ({
       ...attendance,
       date: record.date,
-    })))
-    .filter((student) => {
-      const studentDate = new Date(student.date);
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate) : null;
+      classDuration: record.classDuration,
+    }))
+  );
 
-      const withinDateRange = (!start || studentDate >= start) && (!end || studentDate <= end);
-      const minPercent = percentFilter ? parseInt(percentFilter, 10) : 0;
-      const withinPercentRange = student.totalPresents * 50 >= minPercent; // Assuming each present is worth 50%
+  // Convert summary into an array and calculate percentages
+  const studentAttendanceSummary = flattenedRecords.reduce((acc, record) => {
+    const { studentEnrollment, studentName, totalPresents, classDuration, date } = record;
 
-      return withinDateRange && withinPercentRange;
+    if (!acc[studentEnrollment]) {
+      acc[studentEnrollment] = {
+        studentName,
+        studentEnrollment,
+        totalClasses: 0,
+        totalPresents: 0,
+        attendanceDates: [],
+      };
+    }
+
+    const student = acc[studentEnrollment];
+
+    // Increment the class and present for all records, we will filter by date range later
+    student.totalClasses++;
+    student.totalPresents += totalPresents;
+    student.attendanceDates.push(date);
+
+    return acc;
+  }, {});
+
+  // Convert summary into an array and calculate percentages
+  const studentSummaries = Object.values(studentAttendanceSummary).map((student) => {
+    // Calculate attendance percentage only if totalClasses is greater than 0
+    const attendancePercentage =
+      student.totalClasses > 0
+        ? (student.totalPresents / (student.totalClasses * 2)) * 100 // Assuming 2 classes per session
+        : 0;
+
+    return {
+      ...student,
+      attendancePercentage,
+    };
+  });
+
+  // Filter students based on date range and percent
+  const filterStudentsByDateRange = () => {
+    const minPercent = percentFilter ? parseInt(percentFilter, 10) : 0;
+
+    // If no start or end date is selected, show attendance percentages for all records
+    if (!startDate && !endDate) {
+      const filtered = studentSummaries.filter((student) => student.attendancePercentage >= minPercent);
+      setFilteredStudents(filtered);
+      setIsPercentageChecked(true); // Set flag to true once percentages are checked
+      return;
+    }
+
+    // If date range is selected, filter the records
+    const filtered = studentSummaries.filter((student) => {
+      // Check if attendance percentage meets the min percent requirement
+      const meetsPercentFilter = student.attendancePercentage >= minPercent;
+
+      // Check if the attendance dates fall within the specified date range
+      const isWithinDateRange = student.attendanceDates.some((attendanceDate) => {
+        const date = new Date(attendanceDate);
+        return (!startDate || date >= new Date(startDate)) && (!endDate || date <= new Date(endDate));
+      });
+
+      // Only include students who meet both the percent filter and date range filter
+      return meetsPercentFilter && isWithinDateRange;
     });
+
+    setFilteredStudents(filtered);
+    setIsPercentageChecked(true); // Set flag to true once percentages are checked
+  };
 
   // Generate PDF
   const generatePDF = () => {
@@ -58,22 +119,20 @@ function AttendanceSummaryPage() {
     // Add title
     doc.setFontSize(18);
     doc.text("Attendance Summary", 14, 20);
-    if (subject) {
-      doc.text(`Subject: ${subject}`, 14, 30);
-    }
+    doc.text(`Course Code: ${courseCode}`, 14, 30);
 
     // Define columns for the table
-    const columns = ["Name", "Enrollment", "Total Presents", "Date"];
+    const columns = ["Name", "Enrollment", "Total Presents", "Attendance Percentage"];
     const rows = filteredStudents.map((student) => [
       student.studentName,
       student.studentEnrollment,
       student.totalPresents,
-      student.date,
+      student.attendancePercentage.toFixed(2) + "%",
     ]);
 
     // Add table
     doc.autoTable({
-      startY: subject ? 40 : 30,
+      startY: 40,
       head: [columns],
       body: rows,
     });
@@ -89,7 +148,7 @@ function AttendanceSummaryPage() {
           Attendance Summary
         </h2>
         <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-100 mb-4 sm:mb-6">
-          {subject}
+          {courseCode}
         </h2>
 
         {/* Filters */}
@@ -128,12 +187,22 @@ function AttendanceSummaryPage() {
           </div>
         </div>
 
+        {/* Button to Check Percentage */}
+        <button
+          onClick={filterStudentsByDateRange}
+          className="mb-4 px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+        >
+          Check Percentage
+        </button>
+
+        {/* Button to Generate PDF */}
         <button
           onClick={generatePDF}
           className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
         >
           Download PDF
         </button>
+
         {/* Table */}
         <div className="overflow-x-auto mb-4 sm:mb-6">
           <table className="w-full table-auto border-collapse">
@@ -142,23 +211,28 @@ function AttendanceSummaryPage() {
                 <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Name</th>
                 <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Enrollment</th>
                 <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Total Presents</th>
-                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Date</th>
+                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Attendance Percentage</th>
               </tr>
             </thead>
             <tbody>
               {filteredStudents.length > 0 ? (
                 filteredStudents.map((student, index) => (
-                  <tr key={index} className="border-b border-gray-700">
+                  <tr
+                    key={index}
+                    className="cursor-pointer bg-gray-700 hover:bg-gray-600 text-gray-300"
+                  >
                     <td className="px-2 sm:px-4 py-2 text-gray-300">{student.studentName}</td>
                     <td className="px-2 sm:px-4 py-2 text-gray-300">{student.studentEnrollment}</td>
                     <td className="px-2 sm:px-4 py-2 text-gray-300">{student.totalPresents}</td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.date}</td>
+                    <td className="px-2 sm:px-4 py-2 text-gray-300">
+                      {student.attendancePercentage.toFixed(2)}%
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="px-2 sm:px-4 py-2 text-center text-gray-500">
-                    No records found
+                  <td colSpan="4" className="text-center px-4 py-2 text-gray-500">
+                    No students found for the given criteria.
                   </td>
                 </tr>
               )}
