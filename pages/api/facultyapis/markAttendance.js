@@ -3,13 +3,21 @@ import connectDb from "@/middleware/mongoose";
 
 const handler = async (req, res) => {
   if (req.method === "POST") {
-    const { courseCode, selectedDate, attendanceStatuses } = req.body;
+    const { courseCode, selectedDate, attendanceStatuses, classDuration } = req.body;
 
     // Validation for required fields
-    if (!courseCode || !selectedDate || !attendanceStatuses) {
+    if (!courseCode || !selectedDate || !attendanceStatuses || !classDuration) {
       return res
         .status(400)
         .json({ Success: false, ErrorMessage: "All fields are required." });
+    }
+
+    // Validate classDuration
+    if (!["1", "2"].includes(classDuration)) {
+      return res.status(400).json({
+        Success: false,
+        ErrorMessage: "Invalid class duration. Must be either '1' or '2'.",
+      });
     }
 
     try {
@@ -21,51 +29,68 @@ const handler = async (req, res) => {
           .json({ Success: false, ErrorMessage: "Course not found." });
       }
 
-      const enrollmentNumbers = Object.keys(attendanceStatuses);
-
       // Format the selected date
       const formattedSelectedDate = new Date(selectedDate);
 
-      // Iterate over enrollment numbers and update attendance
-      enrollmentNumbers.forEach((enrollmentNumber) => {
-        let student = course.attendanceStatusofStudents.find(
-          (s) => s.enrollmentNumber === enrollmentNumber
+      // Find or create the attendance record for the given date and class duration
+      // Ensure formattedSelectedDate is a valid Date object
+if (!(formattedSelectedDate instanceof Date) || isNaN(formattedSelectedDate)) {
+  throw new Error("Invalid date provided for formattedSelectedDate");
+}
+
+// Find or create the attendance record for the given date and class duration
+let attendanceRecord = course.attendanceStatusofStudents.find(
+  (record) =>
+    record.date instanceof Date &&
+    !isNaN(record.date) &&
+    record.date.toISOString().split("T")[0] ===
+      formattedSelectedDate.toISOString().split("T")[0]
+);
+
+if (!attendanceRecord) {
+  // If no attendance record for the given date and classDuration, create a new one
+  attendanceRecord = {
+    date: formattedSelectedDate,
+    classDuration: classDuration,
+    attendances: [],
+  };
+  course.attendanceStatusofStudents.push(attendanceRecord);
+}
+
+// Initialize attendance for all students if attendance is missing
+// Now, initialize attendance for all students listed in attendanceStatuses
+attendanceRecord = course.attendanceStatusofStudents.find(
+  (record) =>
+    record.date instanceof Date &&
+    !isNaN(record.date) &&
+    record.date.toISOString().split("T")[0] ===
+      formattedSelectedDate.toISOString().split("T")[0]
+);
+
+
+      
+     
+      console.log(attendanceStatuses);
+      for (let status of attendanceStatuses) {
+        const { enrollmentNumber, name, presentCount } = status;
+
+        // Check if the student is already in the attendances array for this record
+        const studentAttendance = attendanceRecord.attendances.find(
+          (att) => att.studentEnrollment === enrollmentNumber
         );
 
-        if (!student) {
-          // Add the student if they don't exist in the course
-          student = {
-            studentName: attendanceStatuses[enrollmentNumber].name, // Name from frontend
-            enrollmentNumber,
-            attendance: [],
-          };
-          course.attendanceStatusofStudents.push(student);
-        }
-
-        // Find if attendance for the date already exists
-        const attendanceForDate = student.attendance.find(
-          (att) =>
-            att.date.toISOString().split("T")[0] ===
-            formattedSelectedDate.toISOString().split("T")[0]
-        );
-
-        if (attendanceForDate) {
-          // Update existing attendance record
-          attendanceForDate.status =
-            attendanceStatuses[enrollmentNumber].status === "1"
-              ? "Present"
-              : "Absent";
-        } else {
-          // Add new attendance record
-          student.attendance.push({
-            date: formattedSelectedDate,
-            status:
-              attendanceStatuses[enrollmentNumber].status === "1"
-                ? "Present"
-                : "Absent",
+        if (!studentAttendance) {
+          // If student attendance does not exist, create a new attendance entry
+          attendanceRecord.attendances.push({
+            studentName: name,
+            studentEnrollment: enrollmentNumber,
+            totalPresents: presentCount, // 0 = Absent, 1 = Present, 2 = Excused
           });
+        } else {
+          // If student attendance exists, update it
+          studentAttendance.totalPresents = presentCount;
         }
-      });
+      }
 
       // Save the updated course document
       await course.save();

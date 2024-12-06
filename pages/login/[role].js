@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -214,20 +214,19 @@ function LoginPage() {
 
   useEffect(() => {
     setLoading(true);
-    if (role=='admin' && localStorage.getItem('adminToken')) {
+    if (role === 'admin' && localStorage.getItem('adminToken')) {
       setLoading(false);
       router.push("/admin/dashboard");
-    }
-    else if (role=='student' && localStorage.getItem('studentToken')) {
+    } else if (role === 'student' && localStorage.getItem('studentToken')) {
       setLoading(false);
       router.push("/student/dashboard");
-    }
-    else if (role=='faculty' && localStorage.getItem('facultyToken')) {
+    } else if (role === 'faculty' && localStorage.getItem('facultyToken')) {
       setLoading(false);
       router.push("/faculty/dashboard");
     }
     setLoading(false);
-  }, [])
+  }, [role, router]);
+  
 
 
   return (
