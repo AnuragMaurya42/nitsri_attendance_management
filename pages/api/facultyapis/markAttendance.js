@@ -33,30 +33,43 @@ const handler = async (req, res) => {
       const formattedSelectedDate = new Date(selectedDate);
 
       // Find or create the attendance record for the given date and class duration
-      let attendanceRecord = course.attendanceStatusofStudents.find(
-        (record) =>
-          record.date.toISOString().split("T")[0] ===
-            formattedSelectedDate.toISOString().split("T")[0] 
-        );
+      // Ensure formattedSelectedDate is a valid Date object
+if (!(formattedSelectedDate instanceof Date) || isNaN(formattedSelectedDate)) {
+  throw new Error("Invalid date provided for formattedSelectedDate");
+}
 
-      if (!attendanceRecord) {
-        // If no attendance record for the given date and classDuration, create a new one
-        attendanceRecord = {
-          date: formattedSelectedDate,
-          classDuration: classDuration,
-          attendances: [],
-        };
-        course.attendanceStatusofStudents.push(attendanceRecord);
-      }
+// Find or create the attendance record for the given date and class duration
+let attendanceRecord = course.attendanceStatusofStudents.find(
+  (record) =>
+    record.date instanceof Date &&
+    !isNaN(record.date) &&
+    record.date.toISOString().split("T")[0] ===
+      formattedSelectedDate.toISOString().split("T")[0]
+);
 
-      // Initialize attendance for all students if attendance is missing
-      // Now, initialize attendance for all students listed in attendanceStatuses
-      attendanceRecord = course.attendanceStatusofStudents.find(
-        (record) =>
-          record.date.toISOString().split("T")[0] ===
-            formattedSelectedDate.toISOString().split("T")[0] 
-        );
+if (!attendanceRecord) {
+  // If no attendance record for the given date and classDuration, create a new one
+  attendanceRecord = {
+    date: formattedSelectedDate,
+    classDuration: classDuration,
+    attendances: [],
+  };
+  course.attendanceStatusofStudents.push(attendanceRecord);
+}
+
+// Initialize attendance for all students if attendance is missing
+// Now, initialize attendance for all students listed in attendanceStatuses
+attendanceRecord = course.attendanceStatusofStudents.find(
+  (record) =>
+    record.date instanceof Date &&
+    !isNaN(record.date) &&
+    record.date.toISOString().split("T")[0] ===
+      formattedSelectedDate.toISOString().split("T")[0]
+);
+
+
       
+     
       console.log(attendanceStatuses);
       for (let status of attendanceStatuses) {
         const { enrollmentNumber, name, presentCount } = status;
