@@ -1,51 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-
-// Sample data for students
-const studentsData = [
-  { index: 1, name: "John Doe", enrollment: "2021BCSE001", percent: 85, date: "2024-11-01" },
-  { index: 2, name: "Jane Smith", enrollment: "2021BCSE002", percent: 90, date: "2024-11-02" },
-  { index: 3, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
-  { index: 4, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
-  { index: 5, name: "David Wilson", enrollment: "2021BCSE005", percent: 78, date: "2024-11-02" },
-  { index: 6, name: "Jane Smith", enrollment: "2021BCSE002", percent: 90, date: "2024-11-02" },
-  { index: 7, name: "Emily Brown", enrollment: "2021BCSE003", percent: 75, date: "2024-11-03" },
-  { index: 8, name: "Michael Johnson", enrollment: "2021BCSE004", percent: 92, date: "2024-11-01" },
-  { index: 8, name: "David Wilson", enrollment: "2021BCSE005", percent: 78, date: "2024-11-02" },
-];
-
-// Utility to remove duplicates based on a field (e.g., "index")
-const removeDuplicates = (data, key) => {
-  return Array.from(new Set(data.map((item) => item[key]))).map((uniqueKey) =>
-    data.find((item) => item[key] === uniqueKey)
-  );
-};
+import axios from "axios";
 
 function AttendanceSummaryPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [percentFilter, setPercentFilter] = useState("");
-
+  const [attendanceRecords, setAttendanceRecords] = useState([]); // State for fetched attendance data
   const router = useRouter();
-  const { subject } = router.query;
+  const { courseCode } = router.query; // Assuming courseCode is passed as a query param
+  const subject="default";
 
-  // Clean up duplicates in the student data
-  const uniqueStudents = removeDuplicates(studentsData, "index");
+  useEffect(() => {
+    const fetchAttendanceRecords = async () => {
+      if (courseCode) {
+        try {
+          const response = await axios.post("/api/facultyapis/getAttendances", { courseCode });
+          const receivedData=await response.json();
+          if (receivedData.Success) {
+            setAttendanceRecords(receivedData.attendanceRecords);
+          } else {
+            console.error(receivedData.ErrorMessage);
+          }
+        } catch (error) {
+          console.error("Error fetching attendance records:", error.message);
+        }
+      }
+    };
+
+    fetchAttendanceRecords();
+    console.log(attendanceRecords);
+  }, [courseCode]);
 
   // Filter students based on date range and percent
-  const filteredStudents = uniqueStudents.filter((student) => {
-    const studentDate = new Date(student.date);
-    const start = startDate ? new Date(startDate) : null;
-    const end = endDate ? new Date(endDate) : null;
+  const filteredStudents = attendanceRecords
+    .flatMap((record) => record.attendances.map((attendance) => ({
+      ...attendance,
+      date: record.date,
+    })))
+    .filter((student) => {
+      const studentDate = new Date(student.date);
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
 
-    const withinDateRange = (!start || studentDate >= start) && (!end || studentDate <= end);
-    const minPercent = percentFilter ? parseInt(percentFilter, 10) : 0;
-    const withinPercentRange = student.percent >= minPercent;
+      const withinDateRange = (!start || studentDate >= start) && (!end || studentDate <= end);
+      const minPercent = percentFilter ? parseInt(percentFilter, 10) : 0;
+      const withinPercentRange = student.totalPresents * 50 >= minPercent; // Assuming each present is worth 50%
 
-    return withinDateRange && withinPercentRange;
-  });
+      return withinDateRange && withinPercentRange;
+    });
 
   // Generate PDF
   const generatePDF = () => {
@@ -59,12 +64,12 @@ function AttendanceSummaryPage() {
     }
 
     // Define columns for the table
-    const columns = ["Index", "Name", "Enrollment", "Percent"];
+    const columns = ["Name", "Enrollment", "Total Presents", "Date"];
     const rows = filteredStudents.map((student) => [
-      student.index,
-      student.name,
-      student.enrollment,
-      `${student.percent}%`,
+      student.studentName,
+      student.studentEnrollment,
+      student.totalPresents,
+      student.date,
     ]);
 
     // Add table
@@ -135,20 +140,20 @@ function AttendanceSummaryPage() {
           <table className="w-full table-auto border-collapse">
             <thead>
               <tr className="bg-gray-800 text-gray-400">
-                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Index</th>
                 <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Name</th>
                 <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Enrollment</th>
-                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Percent</th>
+                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Total Presents</th>
+                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Date</th>
               </tr>
             </thead>
             <tbody>
               {filteredStudents.length > 0 ? (
-                filteredStudents.map((student) => (
-                  <tr key={student.index} className="border-b border-gray-700">
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.index}</td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.name}</td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.enrollment}</td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.percent}%</td>
+                filteredStudents.map((student, index) => (
+                  <tr key={index} className="border-b border-gray-700">
+                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.studentName}</td>
+                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.studentEnrollment}</td>
+                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.totalPresents}</td>
+                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.date}</td>
                   </tr>
                 ))
               ) : (
@@ -161,9 +166,6 @@ function AttendanceSummaryPage() {
             </tbody>
           </table>
         </div>
-
-        {/* Download PDF Button */}
-   
       </div>
     </div>
   );
