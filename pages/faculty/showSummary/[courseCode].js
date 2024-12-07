@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 import axios from "axios";
+import jsPDF from "jspdf";
+import "jspdf-autotable";  // To generate tables in PDF
 
 function AttendanceSummaryPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [percentFilter, setPercentFilter] = useState("");
+  const [minPercentage, setMinPercentage] = useState("");  // New state for minimum percentage
   const [attendanceRecords, setAttendanceRecords] = useState([]);
-  const [filteredStudents, setFilteredStudents] = useState([]);
-  const [isPercentageChecked, setIsPercentageChecked] = useState(false);
+  const [filteredAttendance, setFilteredAttendance] = useState([]);
   const router = useRouter();
   const { courseCode } = router.query;
 
@@ -20,7 +19,7 @@ function AttendanceSummaryPage() {
         try {
           const response = await axios.post("/api/facultyapis/getAttendances", { courseCode });
           if (response.data.Success) {
-            console.log(response.data.attendanceRecords);
+            console.log("Attendance Records:", response.data.attendanceRecords);
             setAttendanceRecords(response.data.attendanceRecords);
           } else {
             console.error(response.data.ErrorMessage);
@@ -34,110 +33,72 @@ function AttendanceSummaryPage() {
     fetchAttendanceRecords();
   }, [courseCode]);
 
-  // Flatten and process attendance records
-  const flattenedRecords = attendanceRecords.flatMap((record) =>
-    record.attendances.map((attendance) => ({
-      ...attendance,
-      date: record.date,
-      classDuration: record.classDuration,
-    }))
-  );
+  const handleFilter = () => {
+    // Flatten records with dates
+    const flattenedRecords = attendanceRecords.flatMap((record) =>
+      record.attendances.map((attendance) => ({
+        ...attendance,
+        date: record.date,
+      }))
+    );
 
-  // Convert summary into an array and calculate percentages
-  const studentAttendanceSummary = flattenedRecords.reduce((acc, record) => {
-    const { studentEnrollment, studentName, totalPresents, classDuration, date } = record;
-
-    if (!acc[studentEnrollment]) {
-      acc[studentEnrollment] = {
-        studentName,
-        studentEnrollment,
-        totalClasses: 0,
-        totalPresents: 0,
-        attendanceDates: [],
-      };
-    }
-
-    const student = acc[studentEnrollment];
-
-    // Increment the class and present for all records, we will filter by date range later
-    student.totalClasses++;
-    student.totalPresents += totalPresents;
-    student.attendanceDates.push(date);
-
-    return acc;
-  }, {});
-
-  // Convert summary into an array and calculate percentages
-  const studentSummaries = Object.values(studentAttendanceSummary).map((student) => {
-    // Calculate attendance percentage only if totalClasses is greater than 0
-    const attendancePercentage =
-      student.totalClasses > 0
-        ? (student.totalPresents / (student.totalClasses * 2)) * 100 // Assuming 2 classes per session
-        : 0;
-
-    return {
-      ...student,
-      attendancePercentage,
-    };
-  });
-
-  // Filter students based on date range and percent
-  const filterStudentsByDateRange = () => {
-    const minPercent = percentFilter ? parseInt(percentFilter, 10) : 0;
-
-    // If no start or end date is selected, show attendance percentages for all records
-    if (!startDate && !endDate) {
-      const filtered = studentSummaries.filter((student) => student.attendancePercentage >= minPercent);
-      setFilteredStudents(filtered);
-      setIsPercentageChecked(true); // Set flag to true once percentages are checked
-      return;
-    }
-
-    // If date range is selected, filter the records
-    const filtered = studentSummaries.filter((student) => {
-      // Check if attendance percentage meets the min percent requirement
-      const meetsPercentFilter = student.attendancePercentage >= minPercent;
-
-      // Check if the attendance dates fall within the specified date range
-      const isWithinDateRange = student.attendanceDates.some((attendanceDate) => {
-        const date = new Date(attendanceDate);
-        return (!startDate || date >= new Date(startDate)) && (!endDate || date <= new Date(endDate));
-      });
-
-      // Only include students who meet both the percent filter and date range filter
-      return meetsPercentFilter && isWithinDateRange;
+    // Filter by date range
+    const filteredByDate = flattenedRecords.filter((record) => {
+      const recordDate = new Date(record.date);
+      return (
+        (!startDate || recordDate >= new Date(startDate)) &&
+        (!endDate || recordDate <= new Date(endDate))
+      );
     });
 
-    setFilteredStudents(filtered);
-    setIsPercentageChecked(true); // Set flag to true once percentages are checked
+    // Aggregate presents by student
+    const attendanceSummary = filteredByDate.reduce((acc, record) => {
+      const { studentEnrollment, studentName, totalPresents } = record;
+
+      if (!acc[studentEnrollment]) {
+        acc[studentEnrollment] = {
+          studentName,
+          studentEnrollment,
+          totalPresents: 0,
+          totalClasses: 0,
+        };
+      }
+
+      acc[studentEnrollment].totalPresents += totalPresents;
+      acc[studentEnrollment].totalClasses += 1;
+      return acc;
+    }, {});
+
+    // Convert to array and calculate percentage
+    const attendanceArray = Object.values(attendanceSummary).map((student) => ({
+      ...student,
+      percentage: ((student.totalPresents / student.totalClasses) * 100).toFixed(2),
+    }));
+
+    // Filter by minimum percentage if provided
+    const filteredByPercentage = attendanceArray.filter(
+      (student) => minPercentage === "" || student.percentage >= parseFloat(minPercentage)
+    );
+
+    setFilteredAttendance(filteredByPercentage);
   };
 
-  // Generate PDF
-  const generatePDF = () => {
+  const handleDownloadPDF = () => {
     const doc = new jsPDF();
+    doc.text("Attendance Summary Report", 10, 10);
 
-    // Add title
-    doc.setFontSize(18);
-    doc.text("Attendance Summary", 14, 20);
-    doc.text(`Course Code: ${courseCode}`, 14, 30);
-
-    // Define columns for the table
-    const columns = ["Name", "Enrollment", "Total Presents", "Attendance Percentage"];
-    const rows = filteredStudents.map((student) => [
+    const tableData = filteredAttendance.map((student) => [
       student.studentName,
       student.studentEnrollment,
       student.totalPresents,
-      student.attendancePercentage.toFixed(2) + "%",
+      `${student.percentage}%`,
     ]);
 
-    // Add table
     doc.autoTable({
-      startY: 40,
-      head: [columns],
-      body: rows,
+      head: [["Name", "Enrollment", "Total Presents", "Attendance Percentage"]],
+      body: tableData,
     });
 
-    // Save the PDF
     doc.save("Attendance_Summary.pdf");
   };
 
@@ -145,60 +106,54 @@ function AttendanceSummaryPage() {
     <div className="flex flex-col items-center justify-center bg-gray-800 p-4 sm:p-6">
       <div className="w-full max-w-4xl bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md">
         <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-100 mb-4 sm:mb-6">
-          Attendance Summary
-        </h2>
-        <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-100 mb-4 sm:mb-6">
-          {courseCode}
+          Attendance Summary for {courseCode}
         </h2>
 
         {/* Filters */}
         <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between gap-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div>
-              <label className="block text-sm text-gray-400">Start Date</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full sm:w-auto px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-700 text-gray-300"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400">End Date</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full sm:w-auto px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-700 text-gray-300"
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-gray-400">Start Date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-700 text-gray-300"
+            />
           </div>
           <div>
-            <label className="block text-sm text-gray-400">Min Percent</label>
+            <label className="block text-sm text-gray-400">End Date</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-700 text-gray-300"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400">Min Percentage</label>
             <input
               type="number"
+              value={minPercentage}
+              onChange={(e) => setMinPercentage(e.target.value)}
               min="0"
               max="100"
-              value={percentFilter}
-              onChange={(e) => setPercentFilter(e.target.value)}
-              placeholder="Enter min percent"
-              className="w-full sm:w-auto px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-700 text-gray-300"
+              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-700 text-gray-300"
             />
           </div>
         </div>
 
-        {/* Button to Check Percentage */}
+        {/* Button to Apply Filters */}
         <button
-          onClick={filterStudentsByDateRange}
+          onClick={handleFilter}
           className="mb-4 px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
         >
-          Check Percentage
+          Check Attendance
         </button>
 
-        {/* Button to Generate PDF */}
+        {/* Download PDF Button */}
         <button
-          onClick={generatePDF}
-          className="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+          onClick={handleDownloadPDF}
+          className="mb-4 ml-4 px-8 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none"
         >
           Download PDF
         </button>
@@ -215,24 +170,22 @@ function AttendanceSummaryPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map((student, index) => (
+              {filteredAttendance.length > 0 ? (
+                filteredAttendance.map((student, index) => (
                   <tr
                     key={index}
                     className="cursor-pointer bg-gray-700 hover:bg-gray-600 text-gray-300"
                   >
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.studentName}</td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.studentEnrollment}</td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">{student.totalPresents}</td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-300">
-                      {student.attendancePercentage.toFixed(2)}%
-                    </td>
+                    <td className="px-2 sm:px-4 py-2">{student.studentName}</td>
+                    <td className="px-2 sm:px-4 py-2">{student.studentEnrollment}</td>
+                    <td className="px-2 sm:px-4 py-2">{student.totalPresents}</td>
+                    <td className="px-2 sm:px-4 py-2">{student.percentage}%</td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan="4" className="text-center px-4 py-2 text-gray-500">
-                    No students found for the given criteria.
+                    No attendance records found for the given criteria.
                   </td>
                 </tr>
               )}
