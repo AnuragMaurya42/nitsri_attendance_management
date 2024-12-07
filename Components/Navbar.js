@@ -17,21 +17,38 @@ export default function Navbar() {
         router.push("/");
     };
 
-    // Check if the current route is the root
-    const isRoot = router.pathname === "/";
+    const isRoot = router.pathname === '/';
 
     return (
-        <nav className="bg-gray-800 p-4 flex items-center">
-            {/* Home Button, only shown if the current route is not the root */}
+        <nav
+            style={{
+                backgroundColor: '#2d3748', // Tailwind bg-gray-800
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+            }}
+        >
+            {/* Home Button */}
             {!isRoot && (
-                <div className="flex items-center cursor-pointer" onClick={() => router.push('/')}>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        marginBottom: '1rem',
+                        marginBottom: '0', // Tailwind sm:mb-0
+                    }}
+                    onClick={() => router.push('/')}
+                >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="h-6 w-6 text-white"
+                        style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
                     >
                         <path
                             strokeLinecap="round"
@@ -39,26 +56,56 @@ export default function Navbar() {
                             d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
                         />
                     </svg>
-                    <span className="ml-2 text-white font-bold">Home</span>
+                    <span style={{ marginLeft: '0.5rem', color: 'white', fontWeight: 'bold' }}>
+                        Home
+                    </span>
                 </div>
             )}
 
-            {/* Center Circular Logo */}
-            <div className="flex-grow flex justify-center">
+            {/* Center Logo */}
+            <div
+                style={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginBottom: '1rem', // Tailwind mb-4
+                    marginBottom: '0', // Tailwind sm:mb-0
+                }}
+            >
                 <img
-                    src="/logo.png" // Correct usage of the imported logo
+                    src="/logo.png"
                     alt="Logo"
-                    className="h-10 w-100 "
+                    style={{
+                        height: '2.5rem',
+                        width: 'auto',
+                        maxWidth: '100%',
+                        objectFit: 'contain',
+                    }}
                 />
             </div>
 
-            {/* Logout Button, only shown if the current route is not the root */}
+            {/* Logout Button */}
             {!isRoot && (
-                <div className="flex items-center cursor-pointer" onClick={handleLogout}>
-                    <span className="mr-2 text-white font-bold">Logout</span>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                    }}
+                    onClick={handleLogout}
+                >
+                    <span
+                        style={{
+                            marginRight: '0.5rem',
+                            color: 'white',
+                            fontWeight: 'bold',
+                        }}
+                    >
+                        Logout
+                    </span>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 text-white"
+                        style={{ height: '1.5rem', width: '1.5rem', color: 'white' }}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
