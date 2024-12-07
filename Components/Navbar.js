@@ -48,7 +48,7 @@ export default function Navbar() {
                 <img
                     src="/logo.png" // Correct usage of the imported logo
                     alt="Logo"
-                    className="h-10 w-100 "
+                    className="h-8 w-50 "
                 />
             </div>
 
