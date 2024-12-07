@@ -11,7 +11,13 @@ module.exports = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      screens: {
+        'xs': '480px', // Optional: add custom breakpoints
+      },
     },
   },
+  // Disable purging temporarily for debugging
+  mode: "jit",
+  purge: false,
   plugins: [],
 };

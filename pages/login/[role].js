@@ -262,7 +262,6 @@ function LoginPage() {
               src="/images.png" // Correct usage of the imported logo
               alt="Logo"
               className="rounded-full"
-              
             />
           </div>
 
@@ -310,35 +309,29 @@ function LoginPage() {
               />
             </div>
 
-            <div className="mb-4 text-right ">
+            <div className="mb-4 text-right">
               <a
                 href="/forgot-password"
-                className="text-lg font-bold text-blue-500 border-2 bg-blue-200 rounded-full  hover:underline"
+                className="text-lg font-bold text-blue-500 border-2 bg-transparent"
               >
-                Forgot Password?
+                Forgot password?
               </a>
             </div>
 
             <button
-              type="submit"
               onClick={handleClick}
-              className="w-full px-4 py-2 text-lg font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               Login
             </button>
           </form>
-          <div className="mt-4 text-center">
-            {role !== "admin" ? (
-              <button
-                onClick={handleSignupRedirect}
-                className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                Don't have an account?
-              </button>
-            ) : (
-              " "
-            )}
-          </div>
+
+          <button
+            onClick={handleSignupRedirect}
+            className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 mt-3"
+          >
+            Don&apos;t have an account?
+          </button>
         </div>
       )}
     </div>
