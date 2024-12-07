@@ -19,7 +19,6 @@ function AttendanceSummaryPage() {
         try {
           const response = await axios.post("/api/facultyapis/getAttendances", { courseCode });
           if (response.data.Success) {
-            console.log("Attendance Records:", response.data.attendanceRecords);
             setAttendanceRecords(response.data.attendanceRecords);
           } else {
             console.error(response.data.ErrorMessage);
@@ -39,6 +38,7 @@ function AttendanceSummaryPage() {
       record.attendances.map((attendance) => ({
         ...attendance,
         date: record.date,
+        classDuration: record.classDuration
       }))
     );
 
@@ -50,10 +50,10 @@ function AttendanceSummaryPage() {
         (!endDate || recordDate <= new Date(endDate))
       );
     });
-
+    
     // Aggregate presents by student
     const attendanceSummary = filteredByDate.reduce((acc, record) => {
-      const { studentEnrollment, studentName, totalPresents } = record;
+      const { studentEnrollment, studentName, totalPresents,classDuration } = record;
 
       if (!acc[studentEnrollment]) {
         acc[studentEnrollment] = {
@@ -63,17 +63,20 @@ function AttendanceSummaryPage() {
           totalClasses: 0,
         };
       }
-
+      
       acc[studentEnrollment].totalPresents += totalPresents;
-      acc[studentEnrollment].totalClasses += 1;
+      acc[studentEnrollment].totalClasses += Number(classDuration);
       return acc;
     }, {});
 
     // Convert to array and calculate percentage
-    const attendanceArray = Object.values(attendanceSummary).map((student) => ({
-      ...student,
-      percentage: ((student.totalPresents / student.totalClasses) * 100).toFixed(2),
-    }));
+    const attendanceArray = Object.values(attendanceSummary).map((student) => {
+      return {
+        ...student,
+        percentage: ((student.totalPresents / student.totalClasses) * 100).toFixed(2),
+      };
+    });
+    
 
     // Filter by minimum percentage if provided
     const filteredByPercentage = attendanceArray.filter(
