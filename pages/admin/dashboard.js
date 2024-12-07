@@ -25,6 +25,7 @@ export default function Dashboard() {
 
         const data = await res.json();
         if (data.Success) {
+          localStorage.setItem('role', "admin");
           setUser(data.user);
         } else {
           toast.error(data.ErrorMessage, {

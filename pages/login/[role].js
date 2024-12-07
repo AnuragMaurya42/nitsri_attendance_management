@@ -312,7 +312,7 @@ function LoginPage() {
             <div className="mb-4 text-right">
               <a
                 href="/forgot-password"
-                className="text-lg font-bold text-blue-500 border-2 bg-transparent"
+                className="text-lg font-bold text-white  bg-transparent"
               >
                 Forgot password?
               </a>
@@ -326,12 +326,13 @@ function LoginPage() {
             </button>
           </form>
 
-          <button
+          {role !== 'admin' && <button
             onClick={handleSignupRedirect}
             className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 mt-3"
           >
             Don&apos;t have an account?
-          </button>
+          </button>}
+
         </div>
       )}
     </div>
