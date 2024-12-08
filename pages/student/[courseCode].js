@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function Dashboard() {
     const [selectedSubject, setSelectedSubject] = useState(null);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [attendancePercentage, setAttendancePercentage] = useState(0);
     const [showModal, setShowModal] = useState(true);
-    const [showDetails, setShowDetails] = useState(false); // Track whether to show detailed records
+    const [showDetails, setShowDetails] = useState(false);
     const router = useRouter();
     const { courseCode, course, enroll } = router.query;
 
@@ -38,45 +37,46 @@ export default function Dashboard() {
         let totalPresents = 0;
 
         records.forEach(record => {
-            totalClasses += parseInt(record.classDuration);
-            totalPresents += parseInt(record.totalPresents);
+            totalClasses += parseInt(record.classDuration, 10);
+            totalPresents += parseInt(record.totalPresents, 10);
         });
 
-        const attendance = (totalPresents / totalClasses) * 100;
-        return Math.round(attendance);
+        return Math.round((totalPresents / totalClasses) * 100);
     };
 
-    // Download attendance report as PDF using pdfmake
+    // Download attendance report as PDF
     const downloadPDF = () => {
         if (!selectedSubject) return;
 
+        const doc = new jsPDF();
         const { name, records } = selectedSubject;
-        const groupedRecords = groupRecordsByDate(records);
-        const tableData = [];
 
-        Object.entries(groupedRecords).forEach(([date, data]) => {
-            tableData.push([formatDate(date), data.count]);
+        // Add title
+        doc.setFontSize(18);
+        doc.text(`Attendance Report: ${name}`, 14, 20);
+
+        // Add overall attendance
+        doc.setFontSize(12);
+        doc.text(`Overall Attendance: ${attendancePercentage}%`, 14, 30);
+
+        // Add attendance records in table
+        const groupedRecords = groupRecordsByDate(records);
+        const tableData = Object.entries(groupedRecords).map(([date, data]) => [formatDate(date), data.count]);
+
+        doc.autoTable({
+            startY: 40,
+            head: [['Date', 'Total Attendance']],
+            body: tableData,
         });
 
-        const docDefinition = {
-            content: [
-                { text: `Attendance Report: ${name}`, fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
-                { text: `Overall Attendance: ${attendancePercentage}%`, fontSize: 12, margin: [0, 0, 0, 20] },
-                {
-                    table: {
-                        headerRows: 1,
-                        widths: [100, 100],
-                        body: [
-                            ['Date', 'Total Attendance'],
-                            ...tableData,
-                        ],
-                    },
-                    layout: 'lightHorizontalLines',
-                },
-            ],
-        };
+        // Save PDF - Added compatibility for mobile devices
+        const pdfOutput = doc.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfOutput);
 
-        pdfMake.createPdf(docDefinition).download(`${name}_Attendance_Report.pdf`);
+        const link = document.createElement('a');
+        link.href = pdfUrl;
+        link.download = `${name}_Attendance_Report.pdf`;
+        link.click();
     };
 
     // Fetch attendance data from API
@@ -85,22 +85,17 @@ export default function Dashboard() {
             if (!course || !courseCode) return;
 
             try {
-                const submittedData = { courseCode, enrollmentNumber: enroll };
-
                 const response = await fetch('/api/studentapis/getMyAttendance', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(submittedData),
+                    body: JSON.stringify({ courseCode, enrollmentNumber: enroll }),
                 });
 
                 const data = await response.json();
-
                 if (data.Success) {
                     const studentAttendance = data.studentAttendance;
-
-                    // Calculate attendance percentage
                     const calculatedAttendance = calculateAttendance(studentAttendance);
 
                     setAttendanceRecords(studentAttendance);
@@ -139,7 +134,7 @@ export default function Dashboard() {
                         <button
                             onClick={() => {
                                 setShowModal(false);
-                                setShowDetails(true); // Show detailed attendance when clicked
+                                setShowDetails(true);
                             }}
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
@@ -176,22 +171,18 @@ export default function Dashboard() {
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.entries(groupRecordsByDate(selectedSubject.records)).map(([date, data], recIndex) => {
-                                return (
-                                    <tr key={recIndex} className="border-b">
-                                        <td className="px-4 py-2 text-gray-200">{formatDate(date)}</td>
-                                        <td className="px-4 py-2 text-gray-200">{data.count} {data.count > 1 ? 'Attendances' : 'Attendance'}</td>
-                                    </tr>
-                                );
-                            })}
+                            {Object.entries(groupRecordsByDate(selectedSubject.records)).map(([date, data], index) => (
+                                <tr key={index} className="border-b">
+                                    <td className="px-4 py-2 text-gray-200">{formatDate(date)}</td>
+                                    <td className="px-4 py-2 text-gray-200">{data.count}</td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
 
                     <div className="mt-4 flex justify-between">
                         <button
-                            onClick={() => {
-                                router.push('/student/dashboard');
-                            }}
+                            onClick={() => router.push('/student/dashboard')}
                             className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none"
                         >
                             Back to Subjects
