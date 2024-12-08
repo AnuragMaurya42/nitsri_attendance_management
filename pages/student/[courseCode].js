@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { saveAs } from 'file-saver'; // Import FileSaver.js
 
 export default function Dashboard() {
     const [selectedSubject, setSelectedSubject] = useState(null);
@@ -12,13 +13,11 @@ export default function Dashboard() {
     const router = useRouter();
     const { courseCode, course, enroll } = router.query;
 
-    // Format date as "13 Dec 2024"
     const formatDate = (date) => {
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
         return new Date(date).toLocaleDateString('en-GB', options);
     };
 
-    // Group records by date
     const groupRecordsByDate = (records) => {
         return records.reduce((acc, record) => {
             const { date, totalPresents } = record;
@@ -31,7 +30,6 @@ export default function Dashboard() {
         }, {});
     };
 
-    // Calculate attendance percentage
     const calculateAttendance = (records) => {
         let totalClasses = 0;
         let totalPresents = 0;
@@ -44,22 +42,18 @@ export default function Dashboard() {
         return Math.round((totalPresents / totalClasses) * 100);
     };
 
-    // Download attendance report as PDF
     const downloadPDF = () => {
         if (!selectedSubject) return;
 
         const doc = new jsPDF();
         const { name, records } = selectedSubject;
 
-        // Add title
         doc.setFontSize(18);
         doc.text(`Attendance Report: ${name}`, 14, 20);
 
-        // Add overall attendance
         doc.setFontSize(12);
         doc.text(`Overall Attendance: ${attendancePercentage}%`, 14, 30);
 
-        // Add attendance records in table
         const groupedRecords = groupRecordsByDate(records);
         const tableData = Object.entries(groupedRecords).map(([date, data]) => [formatDate(date), data.count]);
 
@@ -69,17 +63,11 @@ export default function Dashboard() {
             body: tableData,
         });
 
-        // Save PDF - Added compatibility for mobile devices
-        const pdfOutput = doc.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfOutput);
-
-        const link = document.createElement('a');
-        link.href = pdfUrl;
-        link.download = `${name}_Attendance_Report.pdf`;
-        link.click();
+        // Save the PDF using FileSaver.js for mobile compatibility
+        const pdfBlob = doc.output('blob');
+        saveAs(pdfBlob, `${name}_Attendance_Report.pdf`);
     };
 
-    // Fetch attendance data from API
     useEffect(() => {
         const fetchAttendance = async () => {
             if (!course || !courseCode) return;
