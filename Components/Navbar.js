@@ -6,7 +6,6 @@ export default function Navbar() {
 
     const handleLogout = () => {
         var role = localStorage.getItem('role');
-        console.log(role);
         if (role === 'faculty') {
             localStorage.removeItem('facultyToken');
         } else if (role === 'admin') {
