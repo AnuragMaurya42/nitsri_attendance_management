@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 export default function Dashboard() {
     const [selectedSubject, setSelectedSubject] = useState(null);
@@ -22,14 +23,11 @@ export default function Dashboard() {
     const groupRecordsByDate = (records) => {
         return records.reduce((acc, record) => {
             const { date, totalPresents } = record;
-
-            // Initialize the count with totalPresents if not already set
             if (!acc[date]) {
-                acc[date] = { count: totalPresents || 0 }; // Default to 0 if totalPresents is not present
+                acc[date] = { count: totalPresents || 0 };
             } else {
-                acc[date].count += totalPresents || 0; // Add totalPresents to the existing count
+                acc[date].count += totalPresents || 0;
             }
-
             return acc;
         }, {});
     };
@@ -48,22 +46,11 @@ export default function Dashboard() {
         return Math.round(attendance);
     };
 
-    // Download attendance report as PDF
+    // Download attendance report as PDF using pdfmake
     const downloadPDF = () => {
         if (!selectedSubject) return;
 
-        const doc = new jsPDF();
         const { name, records } = selectedSubject;
-
-        // Add title
-        doc.setFontSize(18);
-        doc.text(`Attendance Report: ${name}`, 14, 20);
-
-        // Add overall attendance
-        doc.setFontSize(12);
-        doc.text(`Overall Attendance: ${attendancePercentage}%`, 14, 30);
-
-        // Add attendance records in table
         const groupedRecords = groupRecordsByDate(records);
         const tableData = [];
 
@@ -71,15 +58,25 @@ export default function Dashboard() {
             tableData.push([formatDate(date), data.count]);
         });
 
-        // Add table
-        doc.autoTable({
-            startY: 40,
-            head: [['Date', 'Total Attendance']],
-            body: tableData,
-        });
+        const docDefinition = {
+            content: [
+                { text: `Attendance Report: ${name}`, fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
+                { text: `Overall Attendance: ${attendancePercentage}%`, fontSize: 12, margin: [0, 0, 0, 20] },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: [100, 100],
+                        body: [
+                            ['Date', 'Total Attendance'],
+                            ...tableData,
+                        ],
+                    },
+                    layout: 'lightHorizontalLines',
+                },
+            ],
+        };
 
-        // Save PDF
-        doc.save(`${name}_Attendance_Report.pdf`);
+        pdfMake.createPdf(docDefinition).download(`${name}_Attendance_Report.pdf`);
     };
 
     // Fetch attendance data from API
@@ -159,7 +156,6 @@ export default function Dashboard() {
                 Download PDF
             </button>
 
-            {/* Show the detailed attendance records only if showDetails is true */}
             {showDetails && selectedSubject && (
                 <div className="w-full max-w-md mt-6 bg-gray-800 shadow-md rounded-lg p-4 mb-4">
                     <h2 className="text-xl font-semibold mb-2 text-gray-100">{selectedSubject.name}</h2>
@@ -194,7 +190,6 @@ export default function Dashboard() {
                     <div className="mt-4 flex justify-between">
                         <button
                             onClick={() => {
-                                // Redirect to /student/dashboard
                                 router.push('/student/dashboard');
                             }}
                             className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none"
