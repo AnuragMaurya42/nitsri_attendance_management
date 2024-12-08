@@ -10,8 +10,8 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    setLoading(true);
     if (localStorage.getItem("facultyToken")) {
+      setLoading(true);
       let token = localStorage.getItem("facultyToken");
       const helper = async () => {
         try {
@@ -84,12 +84,12 @@ export default function Dashboard() {
             transition: Bounce,
           });
         }
+        setLoading(false);
       };
       helper();
     } else {
       router.push("/login/faculty");
     }
-    setLoading(false);
   }, [router]);
 
   return (
@@ -108,8 +108,8 @@ export default function Dashboard() {
         transition={Bounce}
       />
       {loading ? (
-        <div className="relative h-custom flex justify-center items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        <div className="relative min-h-screen flex justify-center items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
         </div>
       ) : (
         <div>

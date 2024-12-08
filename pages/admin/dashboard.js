@@ -43,18 +43,16 @@ export default function Dashboard() {
       } catch (error) {
         console.error("Error fetching admin info:", error);
       }
+      setLoading(false);
     };
 
     const fetchCourses = async () => {
-      setLoading(true);
       try {
         const res = await fetch("/api/adminapis/getCourses");
         const data = await res.json();
         if (data.Success) {
-          setLoading(false);
           setCourses(data.courses);
         } else {
-          setLoading(false);
           toast.error(data.ErrorMessage, {
             position: "top-center",
             autoClose: 1000,
@@ -68,14 +66,20 @@ export default function Dashboard() {
           });
         }
       } catch (error) {
-        setLoading(false);
         console.error("Error fetching courses:", error);
       }
+      setLoading(false);
     };
-
+    if(localStorage.getItem("adminToken"))
+    {
+     setLoading(true);
     fetchAdminInfo();
     fetchCourses();
-    setLoading(false);
+    }
+    else
+    {
+      router.push("/login/admin");
+    }
   }, []);
 
   // Function to add a new course
@@ -210,8 +214,8 @@ export default function Dashboard() {
         transition={Bounce}
       />
       {loading ? (
-        <div className="relative h-custom flex justify-center items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        <div className="relative min-h-screen flex justify-center items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
         </div>
       ) : (
         <>
@@ -312,7 +316,7 @@ export default function Dashboard() {
                     onClick={() => {/* Your code for update course */ }}
                     className="w-40 m-1 px-4 py-2 text-white bg-yellow-500 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-300"
                   >
-                    <Link href={`/admin/update/${course._id}/${user.department}`}>
+                    <Link href={`/admin/update/${course._id}/${user?.department}`}>
                       Update Course
                     </Link>
                   </button>
