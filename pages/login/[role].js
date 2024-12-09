@@ -311,12 +311,13 @@ function LoginPage() {
 
             <div className="mb-4 text-right">
               <a
-                href="/forgot-password"
-                className="text-lg font-bold text-white  bg-transparent"
+                href={`/login/forgotPassword?role=${role}`}
+                className="text-lg font-bold text-white bg-transparent"
               >
                 Forgot password?
               </a>
             </div>
+
 
             <button
               onClick={handleClick}
