@@ -4,7 +4,7 @@ import "tailwindcss/tailwind.css";
 
 export default function TakeAttendance() {
   const router = useRouter();
-  const { subject } = router.query; // Subject passed as a query parameter
+  const { subject,course } = router.query; // Subject passed as a query parameter
   const [students, setStudents] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [attendanceStatuses, setAttendanceStatuses] = useState({});
@@ -111,7 +111,7 @@ export default function TakeAttendance() {
       <div className="bg-gradient-to-r from-gray-600 via-gray-500 to-gray-400 p-6 rounded-lg shadow-xl w-full max-w-lg mb-6">
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Subject:</label>
-          <p className="text-lg font-semibold">{subject}</p>
+          <p className="text-lg font-semibold">{course} ({subject})</p>
         </div>
 
         <div className="mb-4">

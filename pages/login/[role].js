@@ -228,115 +228,114 @@ function LoginPage() {
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen bg-gray-100"
-      style={{
-        backgroundImage: `url(${image.src})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-        transition={Bounce}
-      />
-      {loading ? (
-        <div className="relative min-h-screen flex justify-center items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
+    className="flex items-center justify-center min-h-screen bg-gray-100"
+    style={{
+      backgroundImage: `url(${image.src})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    }}
+  >
+    <ToastContainer
+      position="top-center"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="colored"
+      transition={Bounce}
+    />
+    {loading ? (
+      <div className="relative min-h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
+      </div>
+    ) : (
+      <div
+        className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md"
+        style={{ backgroundColor: "rgb(0 0 0 / 0%)" }}
+      >
+        <div className="mb-5 flex justify-center h-25">
+          <img
+            src="/images.png"
+            alt="Logo"
+            className="rounded-full"
+          />
         </div>
-      ) : (
-        <div
-          className="w-full max-w-xs p-6 bg-white rounded-lg shadow-md"
-          style={{ backgroundColor: "rgb(0 0 0 / 0%)" }}
-        >
-          <div className="mb-5 flex justify-center h-25">
-            <img
-              src="/images.png" // Correct usage of the imported logo
-              alt="Logo"
-              className="rounded-full"
+  
+        <h2 className="text-2xl font-bold text-center text-white mb-6">
+          {role
+            ? `${role.charAt(0).toUpperCase()}${role.slice(1)} Login`
+            : "Login"}
+        </h2>
+        <form>
+          <div className="mb-4">
+            <label
+              htmlFor="email"
+              className="block text-lg font-medium text-white mb-2"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
             />
           </div>
-
-          <h2 className="text-2xl font-bold  text-center text-white mb-6">
-            {role
-              ? `${role.charAt(0).toUpperCase()}${role.slice(1)} Login`
-              : "Login"}
-          </h2>
-          <form>
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-lg font-medium text-white mb-2"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-lg font-medium text-white mb-2"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-                className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
-
-            <div className="mb-4 text-right">
-              <a
-                href={`/login/forgotPassword?role=${role}`}
-                className="text-lg font-bold text-white bg-transparent"
-              >
-                Forgot password?
-              </a>
-            </div>
-
-
-            <button
-              onClick={handleClick}
-              className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+  
+          <div className="mb-4">
+            <label
+              htmlFor="password"
+              className="block text-lg font-medium text-white mb-2"
             >
-              Login
-            </button>
-          </form>
-
-          {role !== 'admin' && <button
-            onClick={handleSignupRedirect}
-            className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 mt-3"
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+  
+          <div className="mb-4 text-right">
+            <a
+              href={`/login/forgotPassword?role=${role}`}
+              className="text-lg font-bold text-white bg-transparent"
+            >
+              Forgot password?
+            </a>
+          </div>
+  
+          <button
+            onClick={handleClick}
+            className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
-            Don&apos;t have an account?
-          </button>}
-
-        </div>
-      )}
-    </div>
+            Login
+          </button>
+        </form>
+  
+        {role !== 'admin' && <button
+          onClick={handleSignupRedirect}
+          className="w-full px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 mt-3"
+        >
+          Don&apos;t have an account?
+        </button>}
+  
+      </div>
+    )}
+  </div>  
   );
 }
 

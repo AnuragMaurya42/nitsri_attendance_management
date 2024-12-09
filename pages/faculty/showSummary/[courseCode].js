@@ -11,7 +11,7 @@ function AttendanceSummaryPage() {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [filteredAttendance, setFilteredAttendance] = useState([]);
   const router = useRouter();
-  const { courseCode } = router.query;
+  const { courseCode,course } = router.query;
 
   useEffect(() => {
     const fetchAttendanceRecords = async () => {
@@ -109,7 +109,7 @@ function AttendanceSummaryPage() {
     <div className="flex flex-col items-center justify-center bg-gray-800 p-4 sm:p-6">
       <div className="w-full max-w-4xl bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md">
         <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-100 mb-4 sm:mb-6">
-          Attendance Summary for {courseCode}
+          Attendance Summary for {course}
         </h2>
 
         {/* Filters */}
