@@ -136,7 +136,7 @@ const UpdateSubject = () => {
   };
 
   return (
-    <div className="dark min-h-screen bg-gray-900 text-gray-100">
+    <div className=" min-h-screen bg-gray-900 text-gray-100">
       <ToastContainer
         position="top-center"
         autoClose={5000}
@@ -152,17 +152,17 @@ const UpdateSubject = () => {
       />
       {courseDetails && (
         <>
-          <div className="bg-gray-800 p-6 rounded-lg shadow-md max-w-md mx-auto mb-6">
+          <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto mb-6">
             <h1 className="text-2xl font-bold text-green-500 mb-4">
               Course Details
             </h1>
-            <p className="text-gray-400 mb-4">
+            <p className="text-black mb-4">
               <strong>Course Name:</strong> {courseDetails.courseName}
             </p>
-            <p className="text-gray-400 mb-4">
+            <p className="text-black mb-4">
               <strong>Course Code:</strong> {courseDetails.courseCode}
             </p>
-            <p className="text-gray-400 mb-4">
+            <p className="text-black mb-4">
               <strong>Current Faculty:</strong>{" "}
               {courseDetails.courseFaculty
                 ? `${courseDetails.courseFaculty} (ID: ${courseDetails.courseFacultyId})`

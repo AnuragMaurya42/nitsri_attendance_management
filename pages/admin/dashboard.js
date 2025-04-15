@@ -198,8 +198,15 @@ export default function Dashboard() {
       course.courseCode.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+
+
+
+
+
+  
+
   return (
-    <div className="dark min-h-screen bg-gray-900 text-gray-100">
+    <div className=" min-h-screen bg-white-900 text-gray-100">
       <ToastContainer
         position="top-center"
         autoClose={5000}
@@ -219,13 +226,13 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <div className="bg-gray-800 shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
+          <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
             <h1 className="text-5xl font-bold text-green-500 mb-5">Admin</h1>
             {user ? (
               <>
-                <h2 className="text-2xl font-bold mb-4">{user.adminName}</h2>
-                <p className="text-gray-400 mb-4">Department: {user.department}</p>
-                <p className="text-gray-400 mb-4">Email: {user.email}</p>
+                <h2 className="text-2xl font-bold mb-4 text-black">{user.adminName}</h2>
+                <p className="text-black mb-4">Department: {user.department}</p>
+                <p className="text-black mb-4">Email: {user.email}</p>
               </>
             ) : (
               <p className="text-gray-400 mb-4">Loading admin info...</p>
@@ -307,10 +314,10 @@ export default function Dashboard() {
             {filteredCourses.map((course) => (
               <div
                 key={course._id}
-                className="bg-gray-800 p-4 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700"
+                className="bg-white p-4 border border-gray-700 rounded-lg shadow-md dark:bg-white dark:border-gray-700"
               >
                 <h3 className="text-xl font-semibold text-green-500">{course.courseName}</h3>
-                <p className="text-gray-400">Code: {course.courseCode}</p>
+                <p className="text-red-400">Code: {course.courseCode}</p>
                 <div className="flex space-x-4">
                   <button
                     onClick={() => {/* Your code for update course */ }}

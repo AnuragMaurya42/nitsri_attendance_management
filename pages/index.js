@@ -9,7 +9,7 @@ export default function Home() {
   
       <div
         style={{
-          minHeight: "100vh",
+          minHeight: "85vh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -32,7 +32,7 @@ export default function Home() {
         <div
           style={{
             width: "100%",
-            maxWidth: "400px",
+            maxWidth: "350px",
             display: "flex",
             flexDirection: "column",
             gap: "2rem", // Vertical spacing between buttons
@@ -44,7 +44,7 @@ export default function Home() {
               width: "100%",
               height: "60px",
               color: "white",
-              backgroundColor: "#16A34A",
+              backgroundColor: "#EF4444",
 
               border: "none",
               borderRadius: "1rem",
@@ -65,7 +65,7 @@ export default function Home() {
               width: "100%",
               height: "60px",
               color: "white",
-              backgroundColor: "#16A34A",
+              backgroundColor: "#EF4444",
               border: "none",
               borderRadius: "1rem",
               fontWeight: "500",
@@ -85,7 +85,7 @@ export default function Home() {
               width: "100%",
               height: "60px",
               color: "white",
-              backgroundColor: "#16A34A",
+              backgroundColor: "#EF4444",
               border: "none",
               borderRadius: "1rem",
               fontWeight: "500",

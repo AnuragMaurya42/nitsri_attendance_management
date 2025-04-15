@@ -78,7 +78,7 @@ export default function Dashboard() {
   }, [router]);
 
   return (
-    <div className="dark min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-white text-black">
       <ToastContainer
         position="top-center"
         autoClose={5000}
@@ -94,48 +94,45 @@ export default function Dashboard() {
       />
       {loading ? (
         <div className="relative min-h-screen flex justify-center items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-black"></div>
         </div>
       ) : (
         <div>
-          <div className="bg-gray-800 shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
+          <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
             <h1
-              className="text-5xl font-bold text-green-500 mb-5"
+              className="text-5xl font-bold text-red-600 mb-5"
               style={{
                 fontFamily: "Courier New, Courier, monospace",
-                color: "rgb(34, 197, 50)",
               }}
             >
               STUDENT
             </h1>
             <h2 className="text-2xl font-bold mb-4">{user?.name || "Undefined"}</h2>
-            <p className="text-gray-400 mb-4">Enrollment: {user?.enrollmentNumber || "Undefined"}</p>
-            <p className="text-gray-400 mb-4">Batch: {user?.batch || "Undefined"}</p>
+            <p className="text-black mb-4">Enrollment: {user?.enrollmentNumber || "Undefined"}</p>
+            <p className="text-black mb-4">Batch: {user?.batch || "Undefined"}</p>
           </div>
 
           {courses.length === 0 ? (
-            <div className="text-center text-gray-400">
+            <div className="text-center text-black">
               No courses assigned to you.
             </div>
           ) : (
             courses.map((course, index) => (
               <div
                 key={index}
-                className="w-4/5 bg-gray-800 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 mb-6 mx-auto"
+                className="w-4/5 bg-red-200 border border-red-500 rounded-lg shadow-md mb-6 mx-auto"
               >
                 <div className="flex justify-end px-4 pt-4"></div>
                 <div className="flex flex-col items-center pb-10">
-                  <h5 className="mb-1 text-xl font-medium text-gray-100">{course.courseName}</h5>
-                  <span className="text-sm text-gray-400">{course.courseFaculty}</span>
-                  <div className="relative pt-1 w-4/5 mt-2">
-                  </div>
+                  <h5 className="mb-1 text-xl font-medium text-black">{course.courseName}</h5>
+                  <span className="text-sm text-gray-600">{course.courseFaculty}</span>
+                  <div className="relative pt-1 w-4/5 mt-2"></div>
                   <button
                     onClick={() => (window.location.href = `/student/${course.courseCode}?course=${course.courseName}&enroll=${user.enrollmentNumber}`)}
-                    className="mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="mt-4 px-4 py-2 text-white bg-red-600 border border-red-500 rounded-lg hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300"
                   >
                     Go to {course.courseName}
                   </button>
-
                 </div>
               </div>
             ))
