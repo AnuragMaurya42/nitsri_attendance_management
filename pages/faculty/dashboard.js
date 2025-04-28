@@ -142,7 +142,6 @@ export default function Dashboard() {
                     {course.courseName}
                   </h5>
                   <span className="text-sm text-gray-600">{course.courseFaculty}</span>
-
                   <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`} >
                   <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       Take Attendance

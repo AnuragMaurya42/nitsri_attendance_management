@@ -15,8 +15,10 @@ export default function TakeAttendance() {
   useEffect(() => {
     const fetchStudents = async () => {
       if (subject) {
-        const res = await fetch(`/api/facultyapis/getAllStudents`);
+        // Fetch students for the specific course
+        const res = await fetch(`/api/facultyapis/getStudentForCourse?courseCode=${subject}`);
         const data = await res.json();
+        console.log(data)
         if (data.Success) {
           setStudents(data.students);
           const initialStatuses = data.students.reduce((acc, student) => {
