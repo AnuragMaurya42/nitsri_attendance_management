@@ -121,7 +121,7 @@ export default function TakeAttendance() {
     <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center py-8 px-4">
       {/* Header */}
       <div className="text-center mb-8">
-        <p className="text-lg font-bold text-yellow-400">Attendance for {course} ({subject})</p>
+        <p className="text-2xl font-bold text-red-600">Take Attendance for {course} ({subject})</p>
       </div>
 
       {/* Date and Class Duration Section */}

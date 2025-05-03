@@ -11,7 +11,7 @@ const CategoriseStudent = () => {
   const [selectedStudents, setSelectedStudents] = useState({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { courseCode } = router.query; // Fetch courseCode from query params (dynamic)
+  const { courseCode } = router.query;
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -28,11 +28,6 @@ const CategoriseStudent = () => {
           toast.error("Failed to fetch students.", {
             position: "top-center",
             autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
             theme: "colored",
             transition: Bounce,
           });
@@ -50,9 +45,39 @@ const CategoriseStudent = () => {
     fetchStudents();
   }, []);
 
-  const handleSelectToggle = () => {
+  const fetchStudentsForCourse = async () => {
+    try {
+      const res = await fetch(`/api/facultyapis/getStudentForCourse?courseCode=${courseCode}`);
+      const data = await res.json();
+      if (data.Success) {
+        const alreadySelected = data.students.reduce((acc, student) => {
+          acc[student.enrollmentNumber] = true;
+          return acc;
+        }, {});
+        setSelectedStudents(alreadySelected);
+      } else {
+        toast.error("Failed to load students already in course", {
+          position: "top-center",
+          theme: "colored",
+          transition: Bounce,
+        });
+      }
+    } catch (error) {
+      toast.error("Error fetching enrolled students", {
+        position: "top-center",
+        theme: "colored",
+        transition: Bounce,
+      });
+    }
+  };
+
+  const handleSelectToggle = async () => {
+    if (!selectMode) {
+      await fetchStudentsForCourse();
+    } else {
+      setSelectedStudents({});
+    }
     setSelectMode((prev) => !prev);
-    setSelectedStudents({});
   };
 
   const toggleStudentSelection = (enrollmentNumber) => {
@@ -65,12 +90,12 @@ const CategoriseStudent = () => {
   const handleConfirm = async () => {
     setLoading(true);
     const selected = students.filter((student) => selectedStudents[student.enrollmentNumber]);
-  
+
     const payload = {
-      courseCode: courseCode, // Using dynamic courseCode from router
-      selectedStudents: selected, // Send full student objects, not just enrollmentNumber
+      courseCode: courseCode,
+      selectedStudents: selected,
     };
-  
+
     try {
       const res = await fetch("/api/facultyapis/addStudentsToCourse", {
         method: "POST",
@@ -79,18 +104,13 @@ const CategoriseStudent = () => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       const result = await res.json();
-  
+
       if (result.Success) {
         toast.success("Students successfully added to the course.", {
           position: "top-center",
           autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
           theme: "colored",
           transition: Bounce,
         });
@@ -98,11 +118,6 @@ const CategoriseStudent = () => {
         toast.error("Failed to add students: " + result.ErrorMessage, {
           position: "top-center",
           autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
           theme: "colored",
           transition: Bounce,
         });
@@ -115,7 +130,7 @@ const CategoriseStudent = () => {
         transition: Bounce,
       });
     }
-  
+
     setSelectMode(false);
     setSelectedStudents({});
     setLoading(false);
@@ -128,19 +143,7 @@ const CategoriseStudent = () => {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center py-10 px-4">
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-        transition={Bounce}
-      />
+      <ToastContainer position="top-center" autoClose={5000} theme="colored" transition={Bounce} />
       <h1 className="text-3xl font-bold mb-6 text-red-600">Manage Students</h1>
 
       <div className="mb-6 w-full max-w-4xl flex flex-col sm:flex-row items-center gap-4">
@@ -190,7 +193,7 @@ const CategoriseStudent = () => {
 
       {selectMode && filteredStudents.length > 0 && (
         <button
-          className="mt-10 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold"
+          className="mt-10 bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-lg font-semibold"
           onClick={handleConfirm}
         >
           Confirm Selection

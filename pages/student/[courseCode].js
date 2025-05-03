@@ -126,7 +126,7 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-white text-gray-100">
-            <h1 className="text-3xl font-bold text-red-400 mb-2">Attendance Dashboard</h1>
+            <h1 className="text-3xl text-center font-bold text-red-600 mb-2">Attendance Dashboard</h1>
 
             {showModal && !showDetails && (
                 <div className="modal fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-80">
