@@ -143,12 +143,12 @@ export default function Dashboard() {
                   </h5>
                   <span className="text-sm text-gray-600">{course.courseFaculty}</span>
                   <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`} >
-                  <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       Take Attendance
                     </button>
                   </a>
                   <a href={`/faculty/updateAttendance/${course.courseCode}?course=${course.courseName}`} >
-                  <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       Update Attendance
                     </button>
                   </a>
@@ -159,6 +159,14 @@ export default function Dashboard() {
                       Show Summary
                     </button>
                   </a>
+                  <a href={`/faculty/viewStudents?course=${course.courseCode}&courseName=${encodeURIComponent(course.courseName)}`}>
+                    <button
+                      className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                    >
+                      View Students
+                    </button>
+                  </a>
+
                 </div>
               </div>
             ))

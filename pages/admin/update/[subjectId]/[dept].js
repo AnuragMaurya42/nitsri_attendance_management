@@ -195,6 +195,12 @@ const UpdateSubject = () => {
             >
               Select Students
             </button>
+            <button
+              onClick={() => router.push(`/faculty/viewStudents?course=${courseDetails.courseCode}&courseName=${encodeURIComponent(courseDetails.courseName)}`)}
+              className="min-w-[200px] px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl shadow-md transition-all duration-200"
+            >
+              View Students
+            </button>
           </div>
 
           {showFacultyDropdown && (

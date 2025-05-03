@@ -1,5 +1,6 @@
+// pages/api/facultyapis/addStudentsToCourse.js
 import Course from "@/models/Course";
-import Student from "@/models/Student"; // to fetch complete student data
+import Student from "@/models/Student";
 import connectDb from "@/middleware/mongoose";
 
 const handler = async (req, res) => {
@@ -11,17 +12,14 @@ const handler = async (req, res) => {
     }
 
     try {
-      // Find the course by courseCode
       const course = await Course.findOne({ courseCode });
       if (!course) {
         return res.status(404).json({ Success: false, ErrorMessage: "Course not found." });
       }
 
-      // Fetch full student data from DB
       const enrollmentNumbers = selectedStudents.map((s) => s.enrollmentNumber);
       const studentsToAdd = await Student.find({ enrollmentNumber: { $in: enrollmentNumbers } });
 
-      // Reset the students array and add the new students
       const newStudentData = studentsToAdd.map((s) => ({
         enrollmentNumber: s.enrollmentNumber,
         name: s.name,
@@ -29,11 +27,17 @@ const handler = async (req, res) => {
         batch: s.batch,
       }));
 
-      // Reset students array and assign the new students
+      // Update Course
       course.students = newStudentData;
-
-      // Save the updated course document
       await course.save();
+
+      // Update each student to include this course in `enrolledCourses`
+      for (let student of studentsToAdd) {
+        if (!student.enrolledCourses.some((c) => c.courseCode === courseCode)) {
+          student.enrolledCourses.push({ courseCode });
+          await student.save();
+        }
+      }
 
       return res.status(200).json({ Success: true, Message: "Students successfully added to the course." });
     } catch (error) {

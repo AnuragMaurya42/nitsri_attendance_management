@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import "tailwindcss/tailwind.css";
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function TakeAttendance() {
   const router = useRouter();
-  const { subject, course } = router.query; // Subject passed as a query parameter
+  const { subject, course } = router.query;
   const [students, setStudents] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [attendanceStatuses, setAttendanceStatuses] = useState({});
-  const [popupMessage, setPopupMessage] = useState("");
-  const [popupType, setPopupType] = useState("success");
   const [classDuration, setClassDuration] = useState("2");
 
   useEffect(() => {
     const fetchStudents = async () => {
       if (subject) {
-        // Fetch students for the specific course
         const res = await fetch(`/api/facultyapis/getStudentForCourse?courseCode=${subject}`);
         const data = await res.json();
-        console.log(data)
         if (data.Success) {
           setStudents(data.students);
           const initialStatuses = data.students.reduce((acc, student) => {
@@ -26,6 +24,13 @@ export default function TakeAttendance() {
             return acc;
           }, {});
           setAttendanceStatuses(initialStatuses);
+        } else {
+          toast.error("Failed to fetch students.", {
+            position: "top-center",
+            theme: "colored",
+            transition: Bounce,
+            autoClose: 3000,
+          });
         }
       }
     };
@@ -55,16 +60,6 @@ export default function TakeAttendance() {
     });
   };
 
-  const handleMarkAll = (half, checked) => {
-    setAttendanceStatuses((prev) => {
-      const updatedStatuses = { ...prev };
-      students.forEach((student) => {
-        updatedStatuses[student.enrollmentNumber][half] = checked;
-      });
-      return updatedStatuses;
-    });
-  };
-
   const handleClear = () => {
     setAttendanceStatuses(
       students.reduce((acc, student) => {
@@ -76,15 +71,18 @@ export default function TakeAttendance() {
 
   const handleSubmit = async () => {
     if (!selectedDate) {
-      setPopupMessage("Error: Please select a date.");
-      setPopupType("error");
-      setTimeout(() => setPopupMessage(""), 3000);
+      toast.error("Please select a date!", {
+        position: "top-center",
+        theme: "colored",
+        transition: Bounce,
+        autoClose: 3000,
+      });
       return;
     }
 
     const attendancePayload = students.map((student) => {
       const { half1, half2 } = attendanceStatuses[student.enrollmentNumber];
-      let presentCount = classDuration === "1" ? (half1 ? 1 : 0) : (half1 ? 1 : 0) + (half2 ? 1 : 0);
+      const presentCount = classDuration === "1" ? (half1 ? 1 : 0) : (half1 ? 1 : 0) + (half2 ? 1 : 0);
 
       return {
         enrollmentNumber: student.enrollmentNumber,
@@ -108,17 +106,25 @@ export default function TakeAttendance() {
 
     const data = await res.json();
     if (data.Success) {
-      setPopupMessage("Attendance marked successfully!");
-      setPopupType("success");
+      toast.success("Attendance marked successfully!", {
+        position: "top-center",
+        theme: "colored",
+        transition: Bounce,
+        autoClose: 3000,
+      });
     } else {
-      setPopupMessage(data.ErrorMessage);
-      setPopupType("error");
+      toast.error(data.ErrorMessage || "Something went wrong!", {
+        position: "top-center",
+        theme: "colored",
+        transition: Bounce,
+        autoClose: 3000,
+      });
     }
-    setTimeout(() => setPopupMessage(""), 3000);
   };
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center py-8 px-4">
+      <ToastContainer />
       {/* Header */}
       <div className="text-center mb-8">
         <p className="text-2xl font-bold text-red-600">Take Attendance for {course} ({subject})</p>
@@ -139,8 +145,6 @@ export default function TakeAttendance() {
               onChange={(e) => setSelectedDate(e.target.value)}
             />
           </div>
-
-          {/* Class Duration Radio Buttons */}
           <div className="w-1/2 pl-2">
             <label className="block text-sm font-medium text-black mb-1">Class Duration</label>
             <div className="flex space-x-4">
@@ -218,7 +222,6 @@ export default function TakeAttendance() {
                       onChange={(e) => handleCheckboxChange(student.enrollmentNumber, "half1", e.target.checked)}
                       className="w-6 h-6 text-green-500 rounded-full focus:ring-2 focus:ring-green-500"
                     />
-                    <span className="ml-2"></span>
                   </div>
                 )}
               </div>
@@ -229,24 +232,19 @@ export default function TakeAttendance() {
 
       {/* Action Buttons */}
       <div className="space-x-4 text-center">
-        <button onClick={handleClear} className="bg-red-600 hover:bg-red-500 py-2 px-4 rounded text-white transition duration-300">
+        <button
+          onClick={handleClear}
+          className="bg-red-600 hover:bg-red-500 py-2 px-4 rounded text-white transition duration-300"
+        >
           Clear
         </button>
-        <button onClick={handleSubmit} className="bg-green-600 hover:bg-green-500 py-2 px-4 rounded text-white transition duration-300">
+        <button
+          onClick={handleSubmit}
+          className="bg-green-600 hover:bg-green-500 py-2 px-4 rounded text-white transition duration-300"
+        >
           Submit
         </button>
       </div>
-
-      {/* Popup Message */}
-      {popupMessage && (
-        <div
-          className={`fixed top-0 left-0 right-0 py-3 text-center text-white font-semibold ${
-            popupType === "success" ? "bg-green-600" : "bg-red-600"
-          }`}
-        >
-          {popupMessage}
-        </div>
-      )}
     </div>
   );
 }
