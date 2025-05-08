@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import jsPDF from "jspdf";
 import "jspdf-autotable";  // To generate tables in PDF
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AttendanceSummaryPage() {
   const [startDate, setStartDate] = useState("");
@@ -22,9 +24,21 @@ function AttendanceSummaryPage() {
             setAttendanceRecords(response.data.attendanceRecords);
           } else {
             console.error(response.data.ErrorMessage);
+            toast.error("Failed to fetch attendance records.", {
+              position: "top-center",
+              autoClose: 2000,
+              theme: "colored",
+              transition: Bounce,
+            });
           }
         } catch (error) {
           console.error("Error fetching attendance records:", error.message);
+          toast.error("An error occurred while fetching attendance records.", {
+            position: "top-center",
+            autoClose: 2000,
+            theme: "colored",
+            transition: Bounce,
+          });
         }
       }
     };
@@ -38,7 +52,7 @@ function AttendanceSummaryPage() {
       record.attendances.map((attendance) => ({
         ...attendance,
         date: record.date,
-        classDuration: record.classDuration
+        classDuration: record.classDuration,
       }))
     );
 
@@ -50,7 +64,7 @@ function AttendanceSummaryPage() {
         (!endDate || recordDate <= new Date(endDate))
       );
     });
-    
+
     // Aggregate presents by student
     const attendanceSummary = filteredByDate.reduce((acc, record) => {
       const { studentEnrollment, studentName, totalPresents, classDuration } = record;
@@ -63,7 +77,7 @@ function AttendanceSummaryPage() {
           totalClasses: 0,
         };
       }
-      
+
       acc[studentEnrollment].totalPresents += totalPresents;
       acc[studentEnrollment].totalClasses += Number(classDuration);
       return acc;
@@ -76,7 +90,6 @@ function AttendanceSummaryPage() {
         percentage: ((student.totalPresents / student.totalClasses) * 100).toFixed(2),
       };
     });
-    
 
     // Filter by minimum percentage if provided
     const filteredByPercentage = attendanceArray.filter(
@@ -84,9 +97,26 @@ function AttendanceSummaryPage() {
     );
 
     setFilteredAttendance(filteredByPercentage);
+
+    toast.success("Attendance filtered successfully!", {
+      position: "top-center",
+      autoClose: 2000,
+      theme: "colored",
+      transition: Bounce,
+    });
   };
 
   const handleDownloadPDF = () => {
+    if (filteredAttendance.length === 0) {
+      toast.warning("No data to download as PDF.", {
+        position: "top-center",
+        autoClose: 2000,
+        theme: "colored",
+        transition: Bounce,
+      });
+      return;
+    }
+
     const doc = new jsPDF();
     doc.text("Attendance Summary Report", 10, 10);
 
@@ -103,10 +133,18 @@ function AttendanceSummaryPage() {
     });
 
     doc.save("Attendance_Summary.pdf");
+
+    toast.success("PDF Downloaded successfully!", {
+      position: "top-center",
+      autoClose: 2000,
+      theme: "colored",
+      transition: Bounce,
+    });
   };
 
   return (
     <div className="flex flex-col items-center justify-center bg-white p-4 sm:p-6">
+      <ToastContainer position="top-center" autoClose={5000} theme="colored" transition={Bounce} />
       <div className="w-full max-w-4xl bg-white p-4 sm:p-6 rounded-lg shadow-md border border-red-600">
         <h2 className="text-xl sm:text-2xl font-bold text-center text-red-600 mb-4 sm:mb-6">
           Attendance Summary for {course}

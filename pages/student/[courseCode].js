@@ -48,33 +48,37 @@ export default function Dashboard() {
 
     const downloadPDF = () => {
         if (!selectedSubject) return;
-
+    
         const doc = new jsPDF();
         const { name, records } = selectedSubject;
-
+    
         doc.setFontSize(18);
         doc.text(`Attendance Report: ${name}`, 14, 20);
-
+    
+        doc.setFontSize(14);
+        doc.text(`Enrollment Number: ${enroll}`, 14, 30);
+    
         doc.setFontSize(12);
-        doc.text(`Overall Attendance: ${attendancePercentage}%`, 14, 30);
-
+        doc.text(`Overall Attendance: ${attendancePercentage}%`, 14, 40);
+    
         const groupedRecords = groupRecordsByDate(records);
         const tableData = Object.entries(groupedRecords).map(([date, data]) => [formatDate(date), data.count]);
-
+    
         doc.autoTable({
-            startY: 40,
+            startY: 50,
             head: [['Date', 'Total Attendance']],
             body: tableData,
         });
-
+    
         const pdfOutput = doc.output('blob');
         const pdfUrl = URL.createObjectURL(pdfOutput);
-
+    
         const link = document.createElement('a');
         link.href = pdfUrl;
-        link.download = `${name}_Attendance_Report.pdf`;
+        link.download = `${name}_Attendance_Report_${enroll}.pdf`;
         link.click();
     };
+    
 
     useEffect(() => {
         const fetchAttendance = async () => {
@@ -126,8 +130,12 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-white text-gray-100">
-            <h1 className="text-3xl font-bold text-red-400 mb-2">Attendance Dashboard</h1>
-
+            <h1 className="text-3xl text-center font-bold text-red-600 mb-2">Attendance Dashboard</h1>
+            {enroll && (
+                <h2 className="text-xl text-center font-semibold text-gray-800 mb-4">
+                    Enrollment Number: <span className="text-blue-700">{enroll}</span>
+                </h2>
+            )}
             {showModal && !showDetails && (
                 <div className="modal fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-80">
                     <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-80 max-w-lg">
@@ -163,12 +171,12 @@ export default function Dashboard() {
                     <h2 className="text-2xl font-bold mb-4 text-red">{selectedSubject.name}</h2>
                     <p className="mb-4 font-semibold">Overall Attendance: <span className="text-red-400 font-semibold">{selectedSubject.attendance}%</span></p>
 
-                    <div 
-                 className="mb-5" 
-                      style={{ width: '250px', height: '250px', margin: '0 auto', position: 'relative' }}
->
-    <Pie data={pieChartData} />
-</div>
+                    <div
+                        className="mb-5"
+                        style={{ width: '250px', height: '250px', margin: '0 auto', position: 'relative' }}
+                    >
+                        <Pie data={pieChartData} />
+                    </div>
 
 
                     <h3 className="text-lg font-semibold mb-2">Detailed Attendance Records</h3>
@@ -191,12 +199,13 @@ export default function Dashboard() {
 
                     <div className="mt-6 flex justify-end">
                         <button
-                            onClick={() => router.push('/student/dashboard')}
+                            onClick={() => router.back()}
                             className="px-4 py-2 bg-teal-600 text-gray-100 rounded-lg hover:bg-teal-700"
                         >
-                            Back to Subjects
+                            Back
                         </button>
                     </div>
+
                 </div>
             )}
         </div>

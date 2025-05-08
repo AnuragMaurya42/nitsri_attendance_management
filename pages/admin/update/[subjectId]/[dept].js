@@ -176,19 +176,30 @@ const UpdateSubject = () => {
               </Link>
             </div>
           </div>
-
-          <div className="flex justify-center space-x-4 mb-6">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-6">
             <button
               onClick={() => setShowUpdateModal(true)}
-              className="w-40 p-2 bg-green-500 text-white rounded-lg"
+              className="min-w-[200px] px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-md transition-all duration-200"
             >
               Update Course
             </button>
             <button
               onClick={() => setShowFacultyDropdown(!showFacultyDropdown)}
-              className="w-40 p-2 bg-blue-500 text-white rounded-lg"
+              className="min-w-[200px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all duration-200"
             >
               Choose New Faculty
+            </button>
+            <button
+              onClick={() => router.push(`/admin/categoriseStudent?courseCode=${courseDetails.courseCode}`)}
+              className="min-w-[200px] px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-md transition-all duration-200"
+            >
+              Select Students
+            </button>
+            <button
+              onClick={() => router.push(`/faculty/viewStudents?course=${courseDetails.courseCode}&courseName=${encodeURIComponent(courseDetails.courseName)}`)}
+              className="min-w-[200px] px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl shadow-md transition-all duration-200"
+            >
+              View Students
             </button>
           </div>
 

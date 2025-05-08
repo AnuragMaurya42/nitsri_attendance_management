@@ -6,12 +6,25 @@ const courseSchema = new mongoose.Schema(
     courseCode: { type: String, required: true, unique: true },
     courseFaculty: { type: String },
     courseFacultyId: { type: mongoose.Schema.Types.ObjectId, ref: "Faculty" },
+
+    // NEW FIELD: List of student enrollment numbers enrolled in this course
+    students: [
+      {
+        enrollmentNumber: { type: String, required: true },
+        name: String,
+        email: String,
+        batch: String,
+        // Add more fields if needed
+      },
+    ],
+
+
     attendanceStatusofStudents: [
       {
         date: { type: Date, required: true },
         classDuration: {
           type: String,
-          enum: ["1", "2"], // 1-hour or 2-hour class
+          enum: ["1", "2"],
           required: true,
         },
         attendances: [
@@ -20,7 +33,7 @@ const courseSchema = new mongoose.Schema(
             studentEnrollment: { type: String, required: true },
             totalPresents: {
               type: Number,
-              enum: [0, 1, 2], // 0 = Absent, 1 = Present, 2 = Excused
+              enum: [0, 1, 2],
               required: true,
             },
           },
