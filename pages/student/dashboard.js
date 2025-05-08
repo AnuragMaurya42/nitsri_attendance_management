@@ -40,7 +40,7 @@ export default function Dashboard() {
               router.push("/login/student");
             }, 2000);
           } else {
-            localStorage.setItem('role', "student");
+            localStorage.setItem("role", "student");
             setUser(data.user);
 
             const coursesRes = await fetch("/api/studentapis/fetchUpgoingCoures", {
@@ -92,6 +92,7 @@ export default function Dashboard() {
         theme="colored"
         transition={Bounce}
       />
+
       {loading ? (
         <div className="relative min-h-screen flex justify-center items-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-black"></div>
@@ -113,9 +114,7 @@ export default function Dashboard() {
           </div>
 
           {courses.length === 0 ? (
-            <div className="text-center text-black">
-              No courses assigned to you.
-            </div>
+            <div className="text-center text-black">No courses assigned to you.</div>
           ) : (
             courses.map((course, index) => (
               <div
@@ -128,7 +127,9 @@ export default function Dashboard() {
                   <span className="text-sm text-gray-600">{course.courseFaculty}</span>
                   <div className="relative pt-1 w-4/5 mt-2"></div>
                   <button
-                    onClick={() => (window.location.href = `/student/${course.courseCode}?course=${course.courseName}&enroll=${user.enrollmentNumber}`)}
+                    onClick={() =>
+                      (window.location.href = `/student/${course.courseCode}?course=${course.courseName}&enroll=${user.enrollmentNumber}`)
+                    }
                     className="mt-4 px-4 py-2 text-white bg-red-600 border border-red-500 rounded-lg hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300"
                   >
                     Go to {course.courseName}
@@ -137,6 +138,40 @@ export default function Dashboard() {
               </div>
             ))
           )}
+
+          {/* Floating Chatbot Button */}
+          <div
+            onClick={() => router.push("/student/chat/studentchat")}
+            className="fixed bottom-5 right-5 z-50 cursor-pointer group"
+          >
+            <div className="relative w-16 h-16 sm:w-20 sm:h-20 animate-bounce transition-transform duration-300">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/4712/4712038.png"
+                alt="Chatbot"
+                className="w-full h-full rounded-full shadow-xl"
+              />
+              <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs sm:text-sm bg-black text-white px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Chatbot
+              </span>
+            </div>
+          </div>
+
+          {/* 📨 Floating Find Email Button */}
+          <div
+            onClick={() => router.push("/email/frontemail")}
+            className="fixed bottom-5 left-5 z-50 cursor-pointer group"
+          >
+            <div className="relative w-16 h-16 sm:w-20 sm:h-20 animate-bounce transition-transform duration-300">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/561/561127.png"
+                alt="Find Email"
+                className="w-full h-full rounded-full shadow-xl hover:scale-110 transition-transform duration-200"
+              />
+              <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs sm:text-sm bg-black text-white px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Find Email
+              </span>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -20,4 +20,6 @@ module.exports = {
   mode: "jit",
   purge: false,
   plugins: [],
+  plugins: [require('@tailwindcss/typography')],
+
 };
