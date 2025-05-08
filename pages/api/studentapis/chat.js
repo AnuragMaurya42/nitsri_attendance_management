@@ -11,7 +11,7 @@ const getOpenRouterResponse = async (prompt) => {
       headers: {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:3000", // Replace with your site URL in production
+        "HTTP-Referer": "https://nitsri-attendance-management.vercel.app/", // Replace with your site URL in production
         "X-Title": "NIT Attendance Chatbot"
       },
       body: JSON.stringify({

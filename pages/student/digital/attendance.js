@@ -11,7 +11,7 @@ export default function StudentBluetoothPage() {
     if (typeof window !== "undefined") {
       // Ensure socket is only created on the client side
       if (!socketRef.current) {
-        socketRef.current = io(); // You can add your backend URL like io("http://localhost:5000")
+        socketRef.current = io(); 
       }
 
       // Emit student data once on mount
