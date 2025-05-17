@@ -113,20 +113,11 @@ export default function Dashboard() {
                     {course.courseName}
                   </h5>
                   <span className="text-sm text-gray-600">{course.courseFaculty}</span>
-<<<<<<< HEAD
-
-                  <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`}>
-=======
                   <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`} >
->>>>>>> 6e9759bf937835e3b7f91cdd559dc1d753e1f1ef
                     <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       Take Attendance
                     </button>
                   </a>
-<<<<<<< HEAD
-                  <a href={`/faculty/showSummary/${course.courseCode}?course=${course.courseName}`}>
-                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-=======
                   <a href={`/faculty/updateAttendance/${course.courseCode}?course=${course.courseName}`} >
                     <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       Update Attendance
@@ -136,7 +127,6 @@ export default function Dashboard() {
                     <button
                       className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
                     >
->>>>>>> 6e9759bf937835e3b7f91cdd559dc1d753e1f1ef
                       Show Summary
                     </button>
                   </a>
