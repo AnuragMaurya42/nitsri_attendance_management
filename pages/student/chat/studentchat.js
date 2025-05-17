@@ -88,6 +88,7 @@ const StudentChat = () => {
       setTranscript('');
     };
 
+    //hiiiiiiiii everyone 
     recognition.onresult = (event) => {
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
