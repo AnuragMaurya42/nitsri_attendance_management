@@ -2,23 +2,58 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import ReactMarkdown from "react-markdown";
 
+let recognition; // define outside component to avoid re-creation
+
 export default function FacultyChat() {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false); // mic state
   const router = useRouter();
   const messagesEndRef = useRef(null);
 
+  // Setup speech recognition once on mount
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
+      recognition = new window.webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => setListening(true);
+      recognition.onend = () => setListening(false);
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        setListening(false);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setQuery((prev) => (prev ? prev + " " + transcript : transcript));
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch (err) {
+      console.warn("Scroll failed:", err);
+    }
   }, [messages]);
 
   const handleSend = async () => {
     if (!query.trim()) return;
 
-    const token = localStorage.getItem("facultyToken");
+    let token;
+    try {
+      token = localStorage.getItem("facultyToken");
+    } catch (err) {
+      console.error("localStorage error:", err);
+    }
+
     if (!token) {
-      alert("Faculty not authenticated.");
+      alert("Faculty not authenticated. Please log in again.");
       return router.push("/faculty/login");
     }
 
@@ -34,6 +69,8 @@ export default function FacultyChat() {
         body: JSON.stringify({ query, token }),
       });
 
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+
       const data = await res.json();
       setLoading(false);
 
@@ -42,14 +79,15 @@ export default function FacultyChat() {
       } else {
         setMessages((prev) => [
           ...prev,
-          { role: "bot", content: "Error: " + data.ErrorMessage },
+          { role: "bot", content: "Error: " + (data.ErrorMessage || "Unknown error") },
         ]);
       }
     } catch (err) {
+      console.error("Fetch error:", err);
       setLoading(false);
       setMessages((prev) => [
         ...prev,
-        { role: "bot", content: "An unexpected error occurred." },
+        { role: "bot", content: `Error: ${err.message || "An unexpected error occurred."}` },
       ]);
     }
   };
@@ -58,6 +96,14 @@ export default function FacultyChat() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const toggleMic = () => {
+    if (listening) {
+      recognition.stop();
+    } else {
+      recognition.start();
     }
   };
 
@@ -100,7 +146,7 @@ export default function FacultyChat() {
 
       {/* Sticky Input Section */}
       <footer className="bg-white border-t p-3 sticky bottom-0 z-10">
-        <div className="flex gap-2 max-w-2xl mx-auto">
+        <div className="flex gap-2 max-w-2xl mx-auto items-center">
           <textarea
             rows={1}
             value={query}
@@ -109,6 +155,15 @@ export default function FacultyChat() {
             placeholder="Ask something like 'Show DBMS attendance'"
             className="flex-grow p-3 rounded-xl border resize-none focus:ring-2 focus:ring-blue-400 focus:outline-none"
           />
+          <button
+            onClick={toggleMic}
+            className={`p-2 rounded-full border shadow-sm ${
+              listening ? "bg-red-500 text-white" : "bg-gray-200 hover:bg-gray-300"
+            }`}
+            title={listening ? "Stop Listening" : "Start Voice Input"}
+          >
+            🎤
+          </button>
           <button
             onClick={handleSend}
             className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all font-bold shadow-sm"
@@ -137,7 +192,8 @@ export default function FacultyChat() {
           animation: bounce 1.5s infinite;
         }
         @keyframes bounce {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0);
           }
           50% {

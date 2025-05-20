@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
@@ -12,11 +13,17 @@ const StudentChat = () => {
   const [transcript, setTranscript] = useState('');
   const recognitionRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true); // Client-only render to avoid hydration issues
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     const userToken = localStorage.getItem('studentToken');
     if (userToken) setToken(userToken);
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -69,11 +76,9 @@ const StudentChat = () => {
 
   const startListening = () => {
     const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('Speech Recognition not supported in this browser.');
-      return;
-    }
+      typeof window !== 'undefined' &&
+      (window.SpeechRecognition || window.webkitSpeechRecognition);
+    if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
@@ -88,7 +93,6 @@ const StudentChat = () => {
       setTranscript('');
     };
 
-    //hiiiiiiiii everyone 
     recognition.onresult = (event) => {
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -127,10 +131,16 @@ const StudentChat = () => {
     }
   };
 
+  if (!mounted) return null; // Prevents hydration issues
+
+  const isSpeechSupported =
+    typeof window !== 'undefined' &&
+    (window.SpeechRecognition || window.webkitSpeechRecognition);
+
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden relative">
       <header className="bg-indigo-600 text-white text-center py-5 shadow-md z-10">
-        <h2 className="text-3xl font-extrabold">🎙️ Student Chatbot</h2>
+        <h1 className="text-3xl font-extrabold">🎙️ Student Chatbot</h1>
         <p className="text-sm mt-1 font-light">Ask about your attendance & courses</p>
       </header>
 
@@ -178,13 +188,16 @@ const StudentChat = () => {
         >
           Send
         </button>
-        <button
-          onClick={startListening}
-          className="w-12 h-12 rounded-full border-2 border-indigo-500 flex items-center justify-center hover:bg-indigo-100"
-          title="Start voice input"
-        >
-          🎤
-        </button>
+
+        {isSpeechSupported && (
+          <button
+            onClick={startListening}
+            className="w-12 h-12 rounded-full border-2 border-indigo-500 flex items-center justify-center hover:bg-indigo-100"
+            title="Start voice input"
+          >
+            🎤
+          </button>
+        )}
       </div>
 
       {showModal && (
