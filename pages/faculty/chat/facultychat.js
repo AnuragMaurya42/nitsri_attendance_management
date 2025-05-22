@@ -1,5 +1,3 @@
-// Enhanced FacultyChat Component with Real-Time Voice Input & Output + UI Polish
-
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import ReactMarkdown from "react-markdown";
@@ -17,34 +15,50 @@ export default function FacultyChat() {
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
+  // Scroll to the latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Request mic permissions and initialize speech recognition
   useEffect(() => {
-    if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
-      const recognition = new webkitSpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = "en-US";
+    const requestMicrophonePermission = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("Microphone permission granted");
+      } catch (err) {
+        console.error("Microphone permission denied", err);
+      }
+    };
 
-      recognition.onresult = (event) => {
-        let interimTranscript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i];
-          const transcriptChunk = result[0].transcript;
-          if (result.isFinal) {
-            setTranscript((prev) => prev + transcriptChunk + " ");
-          } else {
-            interimTranscript += transcriptChunk;
+    if (typeof window !== "undefined") {
+      requestMicrophonePermission();
+
+      if ("webkitSpeechRecognition" in window) {
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+
+        recognition.onresult = (event) => {
+          let interimTranscript = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            const transcriptChunk = result[0].transcript;
+            if (result.isFinal) {
+              setTranscript((prev) => prev + transcriptChunk + " ");
+            } else {
+              interimTranscript += transcriptChunk;
+            }
           }
-        }
-        setTranscript((prev) => prev.split("__INTERIM__")[0] + "__INTERIM__" + interimTranscript);
-      };
+          setTranscript((prev) => prev.split("__INTERIM__")[0] + "__INTERIM__" + interimTranscript);
+        };
 
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      recognitionRef.current = recognition;
+        recognition.onstart = () => setIsListening(true);
+        recognition.onend = () => setIsListening(false);
+
+        recognitionRef.current = recognition;
+      }
     }
   }, []);
 
