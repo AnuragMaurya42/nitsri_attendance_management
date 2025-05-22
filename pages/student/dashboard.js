@@ -11,41 +11,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     setLoading(true);
-<<<<<<< HEAD
-    if (localStorage.getItem("studentToken")) {
-      let token = localStorage.getItem("studentToken");
-      const helper = async () => {
-        try {
-          const res = await fetch("/api/studentapis/getStudent", {
-            method: "POST",
-            body: JSON.stringify({ token }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          const data = await res.json();
-          if (!data.Success) {
-            localStorage.removeItem("studentToken");
-            toast.error(data.ErrorMessage, {
-              position: "top-center",
-              autoClose: 2000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "colored",
-              transition: Bounce,
-            });
-            setTimeout(() => {
-              router.push("/login/student");
-            }, 2000);
-          } else {
-            localStorage.setItem("role", "student");
-            setUser(data.user);
-=======
     const token = localStorage.getItem("studentToken");
->>>>>>> 6e9759bf937835e3b7f91cdd559dc1d753e1f1ef
 
     if (!token) {
       router.push("/login/student");
@@ -108,24 +74,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-<<<<<<< HEAD
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-        transition={Bounce}
-      />
-
-=======
       <ToastContainer theme="colored" transition={Bounce} />
->>>>>>> 6e9759bf937835e3b7f91cdd559dc1d753e1f1ef
       {loading ? (
         <div className="relative min-h-screen flex justify-center items-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-black"></div>
@@ -159,11 +108,7 @@ export default function Dashboard() {
                     onClick={() =>
                       (window.location.href = `/student/${course.courseCode}?course=${course.courseName}&enroll=${user.enrollmentNumber}`)
                     }
-<<<<<<< HEAD
-                    className="mt-4 px-4 py-2 text-white bg-red-600 border border-red-500 rounded-lg hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300"
-=======
                     className="mt-4 px-4 py-2 text-white bg-red-600 border border-red-500 rounded-lg hover:bg-red-700"
->>>>>>> 6e9759bf937835e3b7f91cdd559dc1d753e1f1ef
                   >
                     Go to {course.courseName}
                   </button>
@@ -190,7 +135,7 @@ export default function Dashboard() {
           </div>
 
           {/* 📨 Floating Find Email Button */}
-          <div
+          {/* <div
             onClick={() => router.push("/email/frontemail")}
             className="fixed bottom-5 left-5 z-50 cursor-pointer group"
           >
@@ -204,7 +149,7 @@ export default function Dashboard() {
                 Find Email
               </span>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
     </div>
