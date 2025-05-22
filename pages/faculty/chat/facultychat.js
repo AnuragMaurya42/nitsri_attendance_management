@@ -1,95 +1,113 @@
+// Enhanced FacultyChat Component with Real-Time Voice Input & Output + UI Polish
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import ReactMarkdown from "react-markdown";
-
-let recognition; // define outside component to avoid re-creation
 
 export default function FacultyChat() {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [listening, setListening] = useState(false); // mic state
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [speakingEnabled, setSpeakingEnabled] = useState(false);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [isListening, setIsListening] = useState(false);
   const router = useRouter();
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
 
-  // Setup speech recognition once on mount
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   useEffect(() => {
     if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
-      recognition = new window.webkitSpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      const recognition = new webkitSpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
       recognition.lang = "en-US";
 
-      recognition.onstart = () => setListening(true);
-      recognition.onend = () => setListening(false);
-      recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
-        setListening(false);
+      recognition.onresult = (event) => {
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          const transcriptChunk = result[0].transcript;
+          if (result.isFinal) {
+            setTranscript((prev) => prev + transcriptChunk + " ");
+          } else {
+            interimTranscript += transcriptChunk;
+          }
+        }
+        setTranscript((prev) => prev.split("__INTERIM__")[0] + "__INTERIM__" + interimTranscript);
       };
 
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setQuery((prev) => (prev ? prev + " " + transcript : transcript));
-      };
+      recognition.onstart = () => setIsListening(true);
+      recognition.onend = () => setIsListening(false);
+      recognitionRef.current = recognition;
     }
   }, []);
 
-  useEffect(() => {
-    try {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    } catch (err) {
-      console.warn("Scroll failed:", err);
-    }
-  }, [messages]);
+  const speak = (text) => {
+    if (!speakingEnabled || !window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    window.speechSynthesis.speak(utterance);
+  };
 
-  const handleSend = async () => {
-    if (!query.trim()) return;
+  const handleSend = async (inputText = query) => {
+    if (!inputText.trim()) return;
 
-    let token;
-    try {
-      token = localStorage.getItem("facultyToken");
-    } catch (err) {
-      console.error("localStorage error:", err);
-    }
-
+    const token = localStorage.getItem("facultyToken");
     if (!token) {
-      alert("Faculty not authenticated. Please log in again.");
+      alert("Faculty not authenticated.");
       return router.push("/faculty/login");
     }
 
-    const newMessage = { role: "user", content: query };
+    const newMessage = { role: "user", content: inputText };
     setMessages((prev) => [...prev, newMessage]);
     setQuery("");
+    setTranscript("");
     setLoading(true);
 
     try {
       const res = await fetch("/api/facultyapis/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, token }),
+        body: JSON.stringify({ query: inputText, token }),
       });
-
-      if (!res.ok) throw new Error(`Server returned ${res.status}`);
 
       const data = await res.json();
       setLoading(false);
 
       if (data?.Success) {
-        setMessages((prev) => [...prev, { role: "bot", content: data.response }]);
+        const botMessage = { role: "bot", content: data.response };
+        setMessages((prev) => [...prev, botMessage]);
+        speak(data.response);
       } else {
-        setMessages((prev) => [
-          ...prev,
-          { role: "bot", content: "Error: " + (data.ErrorMessage || "Unknown error") },
-        ]);
+        const errorMsg = "Error: " + data.ErrorMessage;
+        setMessages((prev) => [...prev, { role: "bot", content: errorMsg }]);
+        speak(errorMsg);
       }
     } catch (err) {
-      console.error("Fetch error:", err);
       setLoading(false);
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", content: `Error: ${err.message || "An unexpected error occurred."}` },
-      ]);
+      const errMsg = "An unexpected error occurred.";
+      setMessages((prev) => [...prev, { role: "bot", content: errMsg }]);
+      speak(errMsg);
     }
+  };
+
+  const startVoicePopup = () => {
+    setTranscript("");
+    setShowVoiceModal(true);
+    recognitionRef.current?.start();
+  };
+
+  const stopAndSendVoice = () => {
+    recognitionRef.current?.stop();
+    const cleanedTranscript = transcript.replace("__INTERIM__", "").trim();
+    setShowVoiceModal(false);
+    handleSend(cleanedTranscript);
   };
 
   const handleKeyDown = (e) => {
@@ -99,114 +117,114 @@ export default function FacultyChat() {
     }
   };
 
-  const toggleMic = () => {
-    if (listening) {
-      recognition.stop();
-    } else {
-      recognition.start();
-    }
-  };
-
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-blue-700 text-white text-xl py-4 text-center font-bold shadow-md">
+    <div className="flex flex-col min-h-screen bg-[#f5f7fa]">
+      <header className="bg-indigo-700 text-white text-xl py-4 text-center font-semibold shadow-md">
         🎓 Faculty Chat Assistant
       </header>
 
-      {/* Chat Messages */}
       <main className="flex-1 overflow-y-auto px-4 py-5 space-y-3">
         <div className="flex flex-col gap-4 max-w-2xl mx-auto">
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`p-4 rounded-lg max-w-[85%] whitespace-pre-wrap transition-opacity ${
+              className={`p-4 rounded-xl max-w-[85%] whitespace-pre-wrap transition-opacity text-sm leading-relaxed shadow-md ${
                 msg.role === "user"
-                  ? "bg-blue-200 self-end text-right shadow-md animate-fade-in"
-                  : "bg-green-100 self-start text-left shadow-md animate-fade-in"
+                  ? "bg-indigo-100 self-end text-right"
+                  : "bg-green-100 self-start text-left"
               }`}
             >
               <ReactMarkdown>{msg.content}</ReactMarkdown>
             </div>
           ))}
 
-          {/* Animated Loading Indicator */}
           {loading && (
             <div className="flex items-center gap-3 text-gray-600 animate-pulse">
-              <span className="w-5 h-5 bg-blue-500 rounded-full animate-bounce"></span>
-              <span className="w-5 h-5 bg-blue-500 rounded-full animate-bounce delay-200"></span>
-              <span className="w-5 h-5 bg-blue-500 rounded-full animate-bounce delay-400"></span>
+              <span className="w-4 h-4 bg-indigo-500 rounded-full animate-bounce"></span>
+              <span className="w-4 h-4 bg-indigo-500 rounded-full animate-bounce delay-200"></span>
+              <span className="w-4 h-4 bg-indigo-500 rounded-full animate-bounce delay-400"></span>
               <p className="text-sm italic">Thinking...</p>
             </div>
           )}
-
           <div ref={messagesEndRef} />
         </div>
       </main>
 
-      {/* Sticky Input Section */}
-      <footer className="bg-white border-t p-3 sticky bottom-0 z-10">
-        <div className="flex gap-2 max-w-2xl mx-auto items-center">
-          <textarea
-            rows={1}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask something like 'Show DBMS attendance'"
-            className="flex-grow p-3 rounded-xl border resize-none focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          />
-          <button
-            onClick={toggleMic}
-            className={`p-2 rounded-full border shadow-sm ${
-              listening ? "bg-red-500 text-white" : "bg-gray-200 hover:bg-gray-300"
-            }`}
-            title={listening ? "Stop Listening" : "Start Voice Input"}
-          >
-            🎤
-          </button>
-          <button
-            onClick={handleSend}
-            className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all font-bold shadow-sm"
-          >
-            Send
-          </button>
+      <footer className="bg-white border-t p-3 fixed bottom-0 w-full z-50">
+        <div className="flex flex-col gap-2 max-w-2xl mx-auto">
+          <div className="flex gap-2">
+            <textarea
+              rows={1}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask something like 'Show DBMS attendance'"
+              className="flex-grow p-3 rounded-xl border resize-none focus:ring-2 focus:ring-indigo-400 focus:outline-none text-gray-800"
+            />
+            <button
+              onClick={() => handleSend()}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-all font-bold shadow-sm"
+            >
+              Send
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={voiceEnabled}
+                onChange={(e) => setVoiceEnabled(e.target.checked)}
+              />
+              <span className="text-sm text-gray-600">Enable Voice Input</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={speakingEnabled}
+                onChange={(e) => setSpeakingEnabled(e.target.checked)}
+              />
+              <span className="text-sm text-gray-600">Enable Voice Output</span>
+            </label>
+            {voiceEnabled && (
+              <button
+                onClick={startVoicePopup}
+                className="bg-green-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-600"
+              >
+                🎤 Start Voice
+              </button>
+            )}
+          </div>
         </div>
       </footer>
 
-      {/* Smooth Message Fade-in Animation */}
-      <style jsx>{`
-        .animate-fade-in {
-          animation: fadeIn 0.4s ease-in-out;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-bounce {
-          animation: bounce 1.5s infinite;
-        }
-        @keyframes bounce {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-        }
-        .delay-200 {
-          animation-delay: 200ms;
-        }
-        .delay-400 {
-          animation-delay: 400ms;
-        }
-      `}</style>
+      {showVoiceModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-md text-center space-y-4">
+            <h2 className="text-lg font-semibold">🎙️ Listening...</h2>
+            <p className="p-3 border rounded-md text-gray-800 bg-gray-100 h-32 overflow-y-auto">
+              {transcript.replace("__INTERIM__", "") || "Speak now..."}
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={stopAndSendVoice}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+              >
+                ✅ Send
+              </button>
+              <button
+                onClick={() => {
+                  recognitionRef.current?.stop();
+                  setShowVoiceModal(false);
+                }}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              >
+                ❌ Cancel
+              </button>
+            </div>
+            {isListening && <p className="text-xs text-gray-500 italic">Listening in real-time...</p>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
