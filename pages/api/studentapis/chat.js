@@ -38,12 +38,61 @@ const handler = async (req, res) => {
     const courses = await Course.find({ courseCode: { $in: courseCodes } });
     console.log(`Found ${courses.length} courses for the student`);
 
-    // Check if query is about DBMS attendance
-    const isDBMSQuery = query.toLowerCase().includes("dbms");
+    const queryLower = query.toLowerCase();
+    const isDBMSQuery = queryLower.includes("dbms");
+    const isTimetableQuery = queryLower.includes("timetable") || queryLower.includes("time table");
+
+    // Handle timetable queries for ANY subject
+    if (isTimetableQuery) {
+      // Extract subject roughly by removing "timetable" or "time table"
+      let subject = queryLower.replace(/timetable|time table/g, "").trim();
+      if (!subject) subject = "the subject";
+
+      const promptForTimetable = `
+You are a helpful assistant. Please create a detailed, day-wise 1-month study timetable for the subject "${subject}". 
+Include key topics and allocate study days accordingly, balancing the schedule well for thorough preparation.
+Respond only in English.
+`;
+
+      const completion = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "deepseek/deepseek-r1-distill-llama-70b:free",
+          messages: [
+            { role: "system", content: "You are a helpful AI assistant for study timetables and attendance queries." },
+            { role: "user", content: promptForTimetable },
+          ],
+          temperature: 0.3,
+          stream: false,
+        }),
+      });
+
+      if (!completion.ok) {
+        const errorText = await completion.text();
+        console.error("OpenRouter API error:", errorText);
+        return res.status(500).json({
+          Success: false,
+          ErrorMessage: "Failed to get response from AI service",
+        });
+      }
+
+      const completionData = await completion.json();
+      const aiResponse = completionData.choices?.[0]?.message?.content || "AI did not return a response.";
+
+      return res.status(200).json({
+        Success: true,
+        response: aiResponse,
+      });
+    }
+
+    // Normal attendance processing
 
     let detailedDBMSAttendance = null;
 
-    // Prepare enrichedCourses and attendanceSummary for all courses
     let enrichedCourses = [];
     let attendanceSummary = [];
 
@@ -109,7 +158,6 @@ const handler = async (req, res) => {
 
       console.log(`Summary for course ${course.courseCode}: Attendance ${attendancePercent}%`);
 
-      // Prepare detailed DBMS attendance if course matches
       if (
         isDBMSQuery &&
         (course.courseCode.toLowerCase() === "dbms" ||
@@ -123,7 +171,7 @@ const handler = async (req, res) => {
       }
     }
 
-    // If query asks for DBMS details, send day-wise attendance for DBMS
+    // If query is about DBMS attendance, show detailed
     if (isDBMSQuery) {
       if (detailedDBMSAttendance && detailedDBMSAttendance.dayWiseAttendance.length > 0) {
         const dayWiseDetails = detailedDBMSAttendance.dayWiseAttendance
@@ -145,18 +193,17 @@ const handler = async (req, res) => {
       }
     }
 
-    // If not DBMS query, send full summary as before
+    // Prepare attendance summary string
     const summaryString = attendanceSummary
       .map(
         (s) =>
-          `${s.courseName} (${s.courseCode}): Attended ${s.totalAttended}/${
-            s.totalPossible
-          }, Attendance: ${s.attendancePercent}%`
+          `${s.courseName} (${s.courseCode}): Attended ${s.totalAttended}/${s.totalPossible}, Attendance: ${s.attendancePercent}%`
       )
       .join("\n");
 
     console.log("Final attendance summary string:", summaryString);
 
+    // Build context for AI for any other questions
     const context = `
 You are a helpful assistant for a faculty member. Respond only in English.
 
@@ -181,14 +228,42 @@ Interpret the user query and provide attendance insights based on course name, c
 
     console.log("Context built for AI:\n", context);
 
-    // Simulate AI response
-    const simulatedAIResponse = `You asked: "${query}". Here is your attendance summary:\n${summaryString}`;
+    const completion = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-r1-distill-llama-70b:free",
+        messages: [
+          { role: "system", content: "You are a helpful AI assistant for faculty attendance queries." },
+          { role: "user", content: context },
+        ],
+        temperature: 0.3,
+        stream: false,
+      }),
+    });
 
-    console.log("Sending response:", simulatedAIResponse);
+    if (!completion.ok) {
+      const errorText = await completion.text();
+      console.error("OpenRouter API error:", errorText);
+      return res.status(500).json({
+        Success: false,
+        ErrorMessage: "Failed to get response from AI service",
+      });
+    }
+
+    const completionData = await completion.json();
+
+    // Assuming the AI response is in completionData.choices[0].message.content
+    const aiResponse = completionData.choices?.[0]?.message?.content || "AI did not return a response.";
+
+    console.log("AI response:", aiResponse);
 
     return res.status(200).json({
       Success: true,
-      response: simulatedAIResponse,
+      response: aiResponse,
     });
   } catch (error) {
     console.error("Error occurred:", error);
