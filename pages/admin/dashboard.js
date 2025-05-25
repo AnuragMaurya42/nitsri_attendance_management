@@ -70,14 +70,12 @@ export default function Dashboard() {
       }
       setLoading(false);
     };
-    if(localStorage.getItem("adminToken"))
-    {
-     setLoading(true);
-    fetchAdminInfo();
-    fetchCourses();
+    if (localStorage.getItem("adminToken")) {
+      setLoading(true);
+      fetchAdminInfo();
+      fetchCourses();
     }
-    else
-    {
+    else {
       router.push("/login/admin");
     }
   }, []);
@@ -203,7 +201,7 @@ export default function Dashboard() {
 
 
 
-  
+
 
   return (
     <div className=" min-h-screen bg-white-900 text-gray-100">
@@ -227,7 +225,7 @@ export default function Dashboard() {
       ) : (
         <>
           <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
-            <h1 className="text-5xl font-bold text-green-500 mb-5">Admin</h1>
+            <h1 className="text-5xl font-bold text-green-500 mb-5" style={{ fontFamily: "Courier New, Courier, monospace" }}>Admin</h1>
             {user ? (
               <>
                 <h2 className="text-2xl font-bold mb-4 text-black">{user.adminName}</h2>
@@ -237,17 +235,6 @@ export default function Dashboard() {
             ) : (
               <p className="text-gray-400 mb-4">Loading admin info...</p>
             )}
-          </div>
-
-          <div className="w-4/5 bg-gray-800 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 mb-6 mx-auto p-4">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by course name or course code"
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ color: "black" }}
-            />
           </div>
 
           {/* Add Course Button */}
@@ -260,6 +247,25 @@ export default function Dashboard() {
             </button>
           </div>
 
+          {/* Manage Users Button */}
+          <div className="flex justify-center items-center mb-4">
+            <Link href={`/admin/manageUsers/${user?.department}`}>
+              <button className="w-40 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                Manage Users
+              </button>
+            </Link>
+          </div>
+
+           <div className="w-4/5 bg-gray-800 border border-gray-700 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 mb-6 mx-auto p-4">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by course name or course code"
+              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              style={{ color: "black" }}
+            />
+          </div>
 
           {/* Add Course Modal */}
           {showAddCourseModal && (
@@ -310,7 +316,7 @@ export default function Dashboard() {
           )}
 
           {/* Courses List */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
             {filteredCourses.map((course) => (
               <div
                 key={course._id}

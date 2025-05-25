@@ -87,7 +87,7 @@ export default function Dashboard() {
               className="text-5xl font-bold text-red-600 mb-5"
               style={{ fontFamily: "Courier New, Courier, monospace" }}
             >
-              STUDENT
+              Student
             </h1>
             <h2 className="text-2xl font-bold mb-4">{user?.name || "Undefined"}</h2>
             <p className="text-black mb-4">Enrollment: {user?.enrollmentNumber || "Undefined"}</p>

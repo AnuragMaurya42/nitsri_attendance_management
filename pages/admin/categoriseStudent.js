@@ -155,14 +155,41 @@ const CategoriseStudent = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <button
-          className={`${
-            selectMode ? "bg-gray-500 hover:bg-gray-400" : "bg-green-600 hover:bg-green-500"
-          } text-white font-semibold px-4 py-3 rounded-lg w-full sm:w-auto`}
+          className={`${selectMode ? "bg-gray-500 hover:bg-gray-400" : "bg-green-600 hover:bg-green-500"
+            } text-white font-semibold px-4 py-3 rounded-lg w-full sm:w-auto`}
           onClick={handleSelectToggle}
         >
           {selectMode ? "Cancel Selection" : "Choose Students"}
         </button>
       </div>
+
+      {selectMode && filteredStudents.length > 0 && (
+        <div className="mb-4 w-full max-w-4xl flex items-center mt-2">
+          <input
+            type="checkbox"
+            id="selectAll"
+            className="mr-2 w-4 h-4"
+            onChange={(e) => {
+              const checked = e.target.checked;
+              const updatedSelections = {};
+              if (checked) {
+                filteredStudents.forEach((student) => {
+                  updatedSelections[student.enrollmentNumber] = true;
+                });
+              }
+              setSelectedStudents(checked ? updatedSelections : {});
+            }}
+            checked={
+              filteredStudents.length > 0 &&
+              filteredStudents.every((student) => selectedStudents[student.enrollmentNumber])
+            }
+          />
+          <label htmlFor="selectAll" className="text-gray-800 font-medium text-lg">
+            Select All
+          </label>
+        </div>
+      )}
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl">
         {filteredStudents.map((student) => (

@@ -1,10 +1,11 @@
+// components/Footer.js
 import React from 'react';
 
 const Footer = () => {
   return (
-    <div style={{ backgroundColor: '#2d3748', color: 'white', padding: '16px', textAlign: 'center' }}>
+    <footer className="bg-gray-800 text-white text-center py-4">
       <p>&copy; {new Date().getFullYear()} NIT Srinagar. All rights reserved.</p>
-    </div>
+    </footer>
   );
 };
 
