@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function UpdateAttendance() {
   const router = useRouter();
-  const { subject,course } = router.query;
+  const { subject, course } = router.query;
 
   const [students, setStudents] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
@@ -104,6 +104,50 @@ export default function UpdateAttendance() {
     }
   };
 
+  const deleteAttendance = async () => {
+    if (!selectedDate) {
+      toast.warning("Please select a date first", {
+        position: "top-center",
+        theme: "colored",
+        transition: Bounce,
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/facultyapis/deleteAttendanceByDate", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseCode: subject,
+          selectedDate,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.Success) {
+        setAttendanceStatuses({});
+        toast.success("Attendance deleted successfully", {
+          position: "top-center",
+          theme: "colored",
+          transition: Bounce,
+        });
+      } else {
+        toast.error(data.ErrorMessage || "Failed to delete attendance", {
+          position: "top-center",
+          theme: "colored",
+          transition: Bounce,
+        });
+      }
+    } catch (error) {
+      toast.error("Error deleting attendance", {
+        position: "top-center",
+        theme: "colored",
+        transition: Bounce,
+      });
+    }
+  };
+
   const handleSubmit = async () => {
     const attendancePayload = students.map((student) => {
       const { half1, half2 } = attendanceStatuses[student.enrollmentNumber];
@@ -164,19 +208,7 @@ export default function UpdateAttendance() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center py-10 px-4">
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-        transition={Bounce}
-      />
+      <ToastContainer />
       <div className="text-center mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-red-600">
           Update Attendance - {subject} ({course})
@@ -190,12 +222,20 @@ export default function UpdateAttendance() {
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
         />
-        <button
-          onClick={fetchAttendance}
-          className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition"
-        >
-          Load Attendance
-        </button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button
+            onClick={fetchAttendance}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+          >
+            Load Attendance
+          </button>
+          <button
+            onClick={deleteAttendance}
+            className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition"
+          >
+            Delete Attendance
+          </button>
+        </div>
       </div>
 
       {students.length > 0 && (

@@ -8,6 +8,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [courses, setCourses] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // New state for search
   const router = useRouter();
 
   useEffect(() => {
@@ -77,6 +78,11 @@ export default function Dashboard() {
     }
   }, [router]);
 
+  const filteredCourses = courses.filter((course) =>
+    course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <ToastContainer />
@@ -98,46 +104,58 @@ export default function Dashboard() {
             <p className="text-gray-600 mb-4">Department: {user?.department}</p>
           </div>
 
-          {courses.length === 0 ? (
+          {/* Search bar */}
+          <div className="flex justify-center mb-6">
+            <input
+              type="text"
+              placeholder="Search course name or code..."
+              className="w-4/5 sm:w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-400"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {filteredCourses.length === 0 ? (
             <div className="text-center text-gray-600 text-xl">
-              No courses are assigned to you.
+              No matching courses found.
             </div>
           ) : (
-            courses.map((course, index) => (
+            filteredCourses.map((course, index) => (
               <div
                 key={index}
                 className="w-4/5 bg-white border border-gray-300 rounded-lg shadow-md mb-6 mx-auto"
               >
                 <div className="flex flex-col items-center pb-10">
-                  <h5 className="mb-1 text-xl font-medium text-gray-900">
-                    {course.courseName}
+                  <h5 className="mb-1 text-xl font-medium text-gray-900 mt-5">
+                    {course.courseName} - {course.courseCode}
                   </h5>
                   <span className="text-sm text-gray-600">{course.courseFaculty}</span>
-                  <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`} >
+
+                  <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`}>
                     <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       Take Attendance
                     </button>
                   </a>
-                  <a href={`/faculty/updateAttendance/${course.courseCode}?course=${course.courseName}`} >
+                  <a href={`/faculty/updateAttendance/${course.courseCode}?course=${course.courseName}`}>
                     <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       Update Attendance
                     </button>
                   </a>
-                  <a href={`/faculty/showSummary/${course.courseCode}?course=${course.courseName}`} >
-                    <button
-                      className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
-                    >
+                  <a href={`/faculty/showSummary/${course.courseCode}?course=${course.courseName}`}>
+                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       Show Summary
                     </button>
                   </a>
                   <a href={`/faculty/viewStudents?course=${course.courseCode}&courseName=${encodeURIComponent(course.courseName)}`}>
-                    <button
-                      className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
-                    >
+                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                       View Students
                     </button>
                   </a>
-
+                  <a href={`/admin/categoriseStudent?courseCode=${course.courseCode}`}>
+                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                      Select Students
+                    </button>
+                  </a>
                 </div>
               </div>
             ))
@@ -145,7 +163,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Bouncing Chatbot Button in Bottom-Right */}
+      {/* Chatbot button */}
       <Link href="/faculty/chat/facultychat">
         <div className="fixed bottom-6 right-6 z-50">
           <div className="relative group animate-bounce">
