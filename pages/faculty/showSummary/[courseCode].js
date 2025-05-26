@@ -142,100 +142,116 @@ function AttendanceSummaryPage() {
     });
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center bg-white p-4 sm:p-6">
-      <ToastContainer position="top-center" autoClose={5000} theme="colored" transition={Bounce} />
-      <div className="w-full max-w-4xl bg-white p-4 sm:p-6 rounded-lg shadow-md border border-red-600">
-        <h2 className="text-xl sm:text-2xl font-bold text-center text-red-600 mb-4 sm:mb-6">
-          Attendance Summary for {course}
-        </h2>
 
-        {/* Filters */}
-        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between gap-4">
-          <div>
-            <label className="block text-sm text-red-600">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 bg-white text-gray-800"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-red-600">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 bg-white text-gray-800"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-red-600">Min Percentage</label>
-            <input
-              type="number"
-              value={minPercentage}
-              onChange={(e) => setMinPercentage(e.target.value)}
-              min="0"
-              max="100"
-              className="w-full px-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 bg-white text-gray-800"
-            />
-          </div>
+
+
+
+
+
+
+
+
+
+return (
+  <div className="flex flex-col items-center bg-white pt-16 pb-20 min-h-screen"> 
+    {/* pt-16 and pb-20 to offset fixed header/footer height */}
+    <ToastContainer position="top-center" autoClose={5000} theme="colored" transition={Bounce} />
+    <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-lg border border-red-600
+                    overflow-y-auto flex flex-col"
+         style={{ maxHeight: 'calc(100vh - 6rem)' }}  /* max height minus header(4rem)+footer(4rem), approx */
+    >
+      <h2 className="text-2xl font-extrabold text-center text-red-600 mb-6">
+        Attendance Summary for {course}
+      </h2>
+
+      {/* Filters */}
+      <div className="mb-6 space-y-4">
+        <div>
+          <label className="block text-sm font-semibold text-red-600 mb-1">Start Date</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 bg-gray-50 text-gray-900"
+          />
         </div>
-
-        {/* Button to Apply Filters */}
-        <button
-          onClick={handleFilter}
-          className="mb-4 px-8 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none"
-        >
-          Check Attendance
-        </button>
-
-        {/* Download PDF Button */}
-        <button
-          onClick={handleDownloadPDF}
-          className="mb-4 ml-4 px-8 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none"
-        >
-          Download PDF
-        </button>
-
-        {/* Table */}
-        <div className="overflow-x-auto mb-4 sm:mb-6">
-          <table className="w-full table-auto border-collapse">
-            <thead>
-              <tr className="bg-red-600 text-white">
-                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Name</th>
-                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Enrollment</th>
-                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Total Presents</th>
-                <th className="px-2 sm:px-4 py-2 text-left border border-gray-700">Attendance Percentage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAttendance.length > 0 ? (
-                filteredAttendance.map((student, index) => (
-                  <tr
-                    key={index}
-                    className="cursor-pointer bg-white hover:bg-gray-100 text-gray-800"
-                  >
-                    <td className="px-2 sm:px-4 py-2">{student.studentName}</td>
-                    <td className="px-2 sm:px-4 py-2">{student.studentEnrollment}</td>
-                    <td className="px-2 sm:px-4 py-2">{student.totalPresents}</td>
-                    <td className="px-2 sm:px-4 py-2">{student.percentage}%</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="text-center px-4 py-2 text-gray-500">
-                    No attendance records found for the given criteria.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div>
+          <label className="block text-sm font-semibold text-red-600 mb-1">End Date</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 bg-gray-50 text-gray-900"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-red-600 mb-1">Min Percentage</label>
+          <input
+            type="number"
+            value={minPercentage}
+            onChange={(e) => setMinPercentage(e.target.value)}
+            min="0"
+            max="100"
+            className="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 bg-gray-50 text-gray-900"
+            placeholder="0 to 100"
+          />
         </div>
       </div>
+
+      {/* Buttons */}
+     <div className="flex space-x-3 mb-4">
+  <button
+    onClick={handleFilter}
+    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none shadow-md text-sm"
+  >
+    Check Attendance
+  </button>
+  <button
+    onClick={handleDownloadPDF}
+    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none shadow-md text-sm"
+  >
+    Download PDF
+  </button>
+</div>
+
+      {/* Table */}
+      <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-inner bg-gray-50">
+        <table className="w-full text-left text-sm text-gray-700">
+          <thead className="bg-red-600 text-white rounded-t-lg">
+            <tr>
+              <th className="px-3 py-2">Name</th>
+              <th className="px-3 py-2">Enrollment</th>
+              <th className="px-3 py-2">Total Presents</th>
+              <th className="px-3 py-2">Attendance %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredAttendance.length > 0 ? (
+              filteredAttendance.map((student, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-gray-200 bg-white hover:bg-red-50 cursor-pointer"
+                >
+                  <td className="px-3 py-2">{student.studentName}</td>
+                  <td className="px-3 py-2">{student.studentEnrollment}</td>
+                  <td className="px-3 py-2">{student.totalPresents}</td>
+                  <td className="px-3 py-2">{student.percentage}%</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="text-center py-4 text-gray-500">
+                  No attendance records found for the given criteria.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default AttendanceSummaryPage;

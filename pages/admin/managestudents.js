@@ -151,15 +151,25 @@ export default function ManageStudents() {
       s.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-   <ToastContainer position="top-center" autoClose={5000} theme="colored" transition={Bounce} />
-      <h1 className="text-3xl font-bold text-purple-700 mb-6">Student List</h1>
+
+
+
+
+
+
+
+
+return (
+  <div className="pt-20 pb-24 h-screen overflow-y-auto bg-gray-100">
+    <ToastContainer position="top-center" autoClose={5000} theme="colored" transition={Bounce} />
+
+    <div className="px-4">
+      <h1 className="text-xl font-bold text-purple-700 mb-4 text-center">Student List</h1>
 
       <input
         type="text"
-        placeholder="Search by enrollment number or email..."
-        className="mb-6 w-full max-w-lg px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+        placeholder="Search enrollment no. or email..."
+        className="mb-4 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -169,27 +179,27 @@ export default function ManageStudents() {
       ) : filteredStudents.length === 0 ? (
         <p className="text-center text-gray-600">No students found.</p>
       ) : (
-        <div className="space-y-6 max-w-5xl mx-auto">
+        <div className="space-y-4">
           {filteredStudents.map((student) => {
             const edited = editFields[student._id] || {};
             return (
               <div
                 key={student._id}
-                className="bg-white shadow rounded-lg p-5 border border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                className="bg-white shadow-md rounded-xl p-4 border border-gray-200"
               >
-                <div className="mb-4 sm:mb-0 space-y-1 w-full sm:w-auto sm:flex-1">
-                  <p>
+                <div className="space-y-2">
+                  <p className="text-sm">
                     <strong>Name:</strong> {student.name}
                   </p>
 
-                  <p>
-                    <strong>Enrollment No:</strong> {student.enrollmentNumber}
+                  <p className="text-sm">
+                    <strong>Enrollment:</strong> {student.enrollmentNumber}
                   </p>
 
-                  <p>
+                  <p className="text-sm">
                     <strong>Department:</strong>{" "}
                     <select
-                      className="border border-gray-300 rounded px-2 py-1 w-60 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                      className="w-full text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       value={edited.department ?? student.department}
                       onChange={(e) =>
                         handleFieldChange(student._id, "department", e.target.value)
@@ -204,11 +214,11 @@ export default function ManageStudents() {
                     </select>
                   </p>
 
-                  <p>
+                  <p className="text-sm">
                     <strong>Batch:</strong>{" "}
                     <input
                       type="text"
-                      className="border border-gray-300 rounded px-2 py-1 w-24 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                      className="w-full text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       value={edited.batch ?? student.batch}
                       onChange={(e) =>
                         handleFieldChange(student._id, "batch", e.target.value)
@@ -217,17 +227,17 @@ export default function ManageStudents() {
                   </p>
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex justify-between mt-4">
                   <button
                     onClick={() => handleUpdate(student)}
-                    className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
+                    className="w-full mr-2 bg-purple-600 text-white text-sm py-2 rounded-lg hover:bg-purple-700 transition"
                   >
                     Update
                   </button>
 
                   <button
                     onClick={() => confirmDelete(student)}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+                    className="w-full ml-2 bg-red-600 text-white text-sm py-2 rounded-lg hover:bg-red-700 transition"
                   >
                     Delete
                   </button>
@@ -237,31 +247,42 @@ export default function ManageStudents() {
           })}
         </div>
       )}
+    </div>
 
-      {studentToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Confirm Delete</h2>
-            <p className="mb-6">
-              Are you sure you want to delete student <strong>{studentToDelete.name}</strong>?
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setStudentToDelete(null)}
-                className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
+    {studentToDelete && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl p-6 w-11/12 max-w-sm shadow-lg">
+          <h2 className="text-lg font-semibold mb-3">Confirm Delete</h2>
+          <p className="mb-4 text-sm">
+            Are you sure you want to delete <strong>{studentToDelete.name}</strong>?
+          </p>
+          <div className="flex justify-end space-x-2">
+            <button
+              onClick={() => setStudentToDelete(null)}
+              className="text-sm px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              className="text-sm px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+            >
+              Delete
+            </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
+
+
+
+
+
+
+
+  
+
+  
 }

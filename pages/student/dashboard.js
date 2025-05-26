@@ -72,35 +72,45 @@ export default function Dashboard() {
     fetchData();
   }, [router]);
 
-  return (
-    <div className="min-h-screen bg-white text-black">
-      <ToastContainer theme="colored" transition={Bounce} />
-      
-      {loading ? (
-        <div className="relative min-h-screen flex justify-center items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-400"></div>
-        </div>
-      ) : (
-        <div>
-          <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto">
-            <h1
-              className="text-5xl font-bold text-red-600 mb-5"
-              style={{ fontFamily: "Courier New, Courier, monospace" }}
-            >
-              Student
-            </h1>
-            <h2 className="text-2xl font-bold mb-4">{user?.name || "Undefined"}</h2>
-            <p className="text-black mb-4">Enrollment: {user?.enrollmentNumber || "Undefined"}</p>
-            <p className="text-black mb-4">Batch: {user?.batch || "Undefined"}</p>
-          </div>
 
+
+
+
+
+
+
+
+return (
+  <div className="min-h-screen bg-white text-black pt-16 pb-16 flex flex-col" style={{ height: '100vh' }}>
+    <ToastContainer theme="colored" transition={Bounce} />
+
+    {loading ? (
+      <div className="flex-grow flex justify-center items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-400"></div>
+      </div>
+    ) : (
+      <>
+        <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto flex-shrink-0">
+          <h1
+            className="text-5xl font-bold text-red-600 mb-5"
+            style={{ fontFamily: "Courier New, Courier, monospace" }}
+          >
+            Student
+          </h1>
+          <h2 className="text-2xl font-bold mb-4">{user?.name || "Undefined"}</h2>
+          <p className="text-black mb-4">Enrollment: {user?.enrollmentNumber || "Undefined"}</p>
+          <p className="text-black mb-4">Batch: {user?.batch || "Undefined"}</p>
+        </div>
+
+        {/* Scrollable Cards Container */}
+        <div className="flex-grow overflow-y-auto px-4 space-y-6">
           {courses.length === 0 ? (
             <div className="text-center text-black">No courses assigned to you.</div>
           ) : (
             courses.map((course, index) => (
               <div
                 key={index}
-                className="w-4/5 bg-red-200 border border-red-500 rounded-lg shadow-md mb-6 mx-auto"
+                className="w-full max-w-md bg-red-200 border border-red-500 rounded-lg shadow-md mx-auto"
               >
                 <div className="flex flex-col items-center pb-10">
                   <h5 className="mb-1 mt-5 text-xl font-medium text-black">{course.courseName}</h5>
@@ -117,42 +127,28 @@ export default function Dashboard() {
               </div>
             ))
           )}
-
-          {/* Floating Chatbot Button */}
-          <div
-            onClick={() => router.push("/student/chat/studentchat")}
-            className="fixed bottom-5 right-5 z-50 cursor-pointer group"
-          >
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 animate-bounce transition-transform duration-300">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/4712/4712038.png"
-                alt="Chatbot"
-                className="w-full h-full rounded-full shadow-xl"
-              />
-              <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs sm:text-sm bg-black text-white px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                Chatbot
-              </span>
-            </div>
-          </div>
-
-          {/* 📨 Floating Find Email Button */}
-          {/* <div
-            onClick={() => router.push("/email/frontemail")}
-            className="fixed bottom-5 left-5 z-50 cursor-pointer group"
-          >
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 animate-bounce transition-transform duration-300">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/561/561127.png"
-                alt="Find Email"
-                className="w-full h-full rounded-full shadow-xl hover:scale-110 transition-transform duration-200"
-              />
-              <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs sm:text-sm bg-black text-white px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                Find Email
-              </span>
-            </div>
-          </div> */}
         </div>
-      )}
-    </div>
-  );
+
+        {/* Floating Chatbot Button */}
+        <div
+          onClick={() => router.push("/student/chat/studentchat")}
+          className="fixed bottom-20 right-5 z-50 cursor-pointer group"
+        >
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 animate-bounce transition-transform duration-300">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/4712/4712038.png"
+              alt="Chatbot"
+              className="w-full h-full rounded-full shadow-xl"
+            />
+            <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs sm:text-sm bg-black text-white px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              Chatbot
+            </span>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+);
+
+
 }

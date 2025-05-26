@@ -128,86 +128,102 @@ export default function Dashboard() {
         ],
     };
 
+
+
+
+
+
+
+
+
+
     return (
-        <div className="min-h-screen bg-white text-gray-100">
-            <h1 className="text-3xl text-center font-bold text-red-600 mb-2">Attendance Dashboard</h1>
-            {enroll && (
-                <h2 className="text-xl text-center font-semibold text-gray-800 mb-4">
-                    Enrollment Number: <span className="text-blue-700">{enroll}</span>
-                </h2>
-            )}
-            {showModal && !showDetails && (
-                <div className="modal fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-80">
-                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-80 max-w-lg">
-                        <h2 className="text-2xl font-bold text-red mb-4">{course}</h2>
-                        <p className="text-xl mb-4">Attendance: <span className="text-green-400">{attendancePercentage}%</span></p>
+  <div className="min-h-screen bg-white text-gray-900 pt-16 pb-16 overflow-auto max-w-md mx-auto shadow-lg rounded-lg">
+    <h1 className="text-3xl text-center font-bold text-red-600 mb-4 mt-4">Attendance Dashboard</h1>
 
-                        <div className="mb-6">
-                            <Pie data={pieChartData} />
-                        </div>
+    {enroll && (
+      <h2 className="text-lg text-center font-semibold text-gray-800 mb-6">
+        Enrollment Number: <span className="text-blue-700">{enroll}</span>
+      </h2>
+    )}
 
-                        <button
-                            onClick={() => {
-                                setShowModal(false);
-                                setShowDetails(true);
-                            }}
-                            className="px-4 py-2 bg-teal-600 text-gray-100 rounded-lg hover:bg-teal-700"
-                        >
-                            View Detailed Attendance
-                        </button>
-                    </div>
-                </div>
-            )}
+    {showModal && !showDetails && (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-90 z-40 p-4">
+        <div className="bg-gray-900 p-6 rounded-xl shadow-xl w-full max-w-sm mx-auto text-white">
+          <h2 className="text-2xl font-bold text-red-500 mb-4 text-center">{course}</h2>
+          <p className="text-xl mb-6 text-center">
+            Attendance: <span className="text-green-400 font-semibold">{attendancePercentage}%</span>
+          </p>
 
-            <button
-                onClick={downloadPDF}
-                className="px-4 py-2 bg-blue-600 text-gray-100 rounded-lg hover:bg-blue-700 focus:outline-none mt-6 mx-auto block"
-            >
-                Download PDF
-            </button>
+          <div className="mb-6 flex justify-center">
+            <Pie data={pieChartData} className="w-48 h-48" />
+          </div>
 
-            {showDetails && selectedSubject && (
-                <div className="w-full max-w-2xl text-black mx-auto mt-8 bg-white shadow-md rounded-lg p-6">
-                    <h2 className="text-2xl font-bold mb-4 text-red">{selectedSubject.name}</h2>
-                    <p className="mb-4 font-semibold">Overall Attendance: <span className="text-red-400 font-semibold">{selectedSubject.attendance}%</span></p>
-
-                    <div
-                        className="mb-5"
-                        style={{ width: '250px', height: '250px', margin: '0 auto', position: 'relative' }}
-                    >
-                        <Pie data={pieChartData} />
-                    </div>
-
-
-                    <h3 className="text-lg font-semibold mb-2">Detailed Attendance Records</h3>
-                    <table className="w-full table-auto border-collapse">
-                        <thead>
-                            <tr>
-                                <th className="px-4 py-2 border-b border-gray-700 text-left">Date</th>
-                                <th className="px-4 py-2 border-b border-gray-700 text-left">Total Attendance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.entries(groupRecordsByDate(selectedSubject.records)).map(([date, data], index) => (
-                                <tr key={index} className="border-b border-gray-700">
-                                    <td className="px-4 py-2">{formatDate(date)}</td>
-                                    <td className="px-4 py-2">{data.count}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-
-                    <div className="mt-6 flex justify-end">
-                        <button
-                            onClick={() => router.back()}
-                            className="px-4 py-2 bg-teal-600 text-gray-100 rounded-lg hover:bg-teal-700"
-                        >
-                            Back
-                        </button>
-                    </div>
-
-                </div>
-            )}
+          <button
+            onClick={() => {
+              setShowModal(false);
+              setShowDetails(true);
+            }}
+            className="w-full px-4 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg font-semibold focus:outline-none transition"
+          >
+            View Detailed Attendance
+          </button>
         </div>
-    );
+      </div>
+    )}
+
+    <button
+      onClick={downloadPDF}
+      className="block w-11/12 max-w-xs mx-auto mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold focus:outline-none transition"
+    >
+      Download PDF
+    </button>
+
+    {showDetails && selectedSubject && (
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 mt-8 mx-auto text-gray-900">
+        <h2 className="text-2xl font-bold mb-4 text-red-600 text-center">{selectedSubject.name}</h2>
+        <p className="mb-4 font-semibold text-center">
+          Overall Attendance: <span className="text-red-500">{selectedSubject.attendance}%</span>
+        </p>
+
+        <div className="mb-6 flex justify-center">
+          <Pie data={pieChartData} className="w-56 h-56" />
+        </div>
+
+        <h3 className="text-lg font-semibold mb-3 border-b border-gray-300 pb-1">Detailed Attendance Records</h3>
+        <div className="overflow-y-auto max-h-64 rounded-md border border-gray-300">
+          <table className="w-full table-auto text-sm">
+            <thead className="bg-gray-100 sticky top-0">
+              <tr>
+                <th className="px-4 py-2 text-left text-gray-700">Date</th>
+                <th className="px-4 py-2 text-left text-gray-700">Total Attendance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(groupRecordsByDate(selectedSubject.records)).map(([date, data], index) => (
+                <tr
+                  key={index}
+                  className={`border-b ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                >
+                  <td className="px-4 py-2">{formatDate(date)}</td>
+                  <td className="px-4 py-2">{data.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={() => router.back()}
+            className="px-6 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-semibold focus:outline-none transition"
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
 }

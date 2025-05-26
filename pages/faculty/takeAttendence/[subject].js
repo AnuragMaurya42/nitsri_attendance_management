@@ -122,129 +122,149 @@ export default function TakeAttendance() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center py-8 px-4">
-      <ToastContainer />
-      {/* Header */}
-      <div className="text-center mb-8">
-        <p className="text-2xl font-bold text-red-600">Take Attendance for {course} ({subject})</p>
-      </div>
 
-      {/* Date and Class Duration Section */}
-      <div className="bg-red-100 p-3 rounded-lg shadow-lg mb-3 w-full max-w-xl mx-auto flex items-center justify-between">
-        <div className="mb-2 flex flex-1 items-center justify-between">
-          <div className="w-1/2 pr-2">
-            <label htmlFor="date" className="block text-sm font-medium text-black mb-1">
-              Select Class Date
-            </label>
+
+
+
+
+
+
+
+
+
+return (
+  <div className="flex flex-col h-screen bg-white text-gray-900 font-sans max-w-md mx-auto shadow-md rounded-xl overflow-hidden">
+
+    {/* Header space placeholder (same height as your fixed Navbar) */}
+    <div className="h-14 flex items-center justify-center bg-gray-800 text-white font-bold text-lg shadow-md z-10">
+      Take Attendance
+    </div>
+
+    {/* Scrollable content */}
+    <main className="flex-1 overflow-y-auto px-5 py-4 bg-white">
+
+      {/* Title */}
+      <h1 className="text-2xl font-extrabold text-red-600 mb-6 text-center">
+        {course ? `Take Attendance for ${course} (${subject})` : "Loading..."}
+      </h1>
+
+      {/* Date and Duration */}
+      <section className="bg-red-50 rounded-xl p-4 mb-6 shadow-sm">
+
+        <label htmlFor="date" className="block mb-1 font-semibold text-gray-800">
+          Select Class Date
+        </label>
+        <input
+          id="date"
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-400 focus:outline-none mb-4 text-gray-900"
+        />
+
+        <fieldset className="flex justify-around text-gray-800 font-semibold">
+          <label className="flex items-center space-x-2 cursor-pointer">
             <input
-              type="date"
-              id="date"
-              className="p-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              type="radio"
+              name="classDuration"
+              value="1"
+              checked={classDuration === "1"}
+              onChange={(e) => setClassDuration(e.target.value)}
+              className="w-5 h-5 text-red-500 focus:ring-red-400"
             />
-          </div>
-          <div className="w-1/2 pl-2">
-            <label className="block text-sm font-medium text-black mb-1">Class Duration</label>
-            <div className="flex space-x-4">
-              <label className="flex items-center space-x-2 text-black">
-                <input
-                  type="radio"
-                  name="classDuration"
-                  value="1"
-                  checked={classDuration === "1"}
-                  onChange={(e) => setClassDuration(e.target.value)}
-                  className="w-6 h-6 text-red-500 border-gray-600 focus:ring-2 focus:ring-red-500"
-                />
-                <span>1 Hour</span>
-              </label>
-              <label className="flex items-center space-x-2 text-black">
-                <input
-                  type="radio"
-                  name="classDuration"
-                  value="2"
-                  checked={classDuration === "2"}
-                  onChange={(e) => setClassDuration(e.target.value)}
-                  className="w-6 h-6 text-red-500 border-gray-600 focus:ring-2 focus:ring-red-500"
-                />
-                <span>2 Hours</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
+            <span>1 Hour</span>
+          </label>
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="radio"
+              name="classDuration"
+              value="2"
+              checked={classDuration === "2"}
+              onChange={(e) => setClassDuration(e.target.value)}
+              className="w-5 h-5 text-red-500 focus:ring-red-400"
+            />
+            <span>2 Hours</span>
+          </label>
+        </fieldset>
+      </section>
 
       {/* Select All Button */}
-      <div className="mb-6">
+      <div className="mb-6 text-center">
         <button
           onClick={handleSelectAll}
-          className="bg-red-600 hover:bg-red-500 py-2 px-4 rounded text-white transition duration-300"
+          className="bg-red-600 hover:bg-red-700 transition rounded-full px-8 py-3 text-white font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
         >
           Select All
         </button>
       </div>
 
       {/* Attendance Cards */}
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl mx-auto mb-8">
-        <h2 className="text-3xl font-semibold text-gray-900 mb-6">Mark Attendance</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <section className="mb-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Mark Attendance</h2>
+
+        <div className="grid grid-cols-1 gap-4">
           {students.map((student) => (
             <div
               key={student.enrollmentNumber}
-              className="bg-red-100 p-4 rounded-lg flex flex-col items-center text-gray-900 hover:bg-red-200 transition-all duration-200"
+              className="flex justify-between items-center bg-red-100 rounded-xl p-4 shadow-sm hover:bg-red-200 transition cursor-pointer"
             >
-              <div className="flex items-center justify-between w-full">
-                <p className="text-lg font-semibold text-red-600">{student.name.split(" ")[0]}</p>
-                <p className="text-sm text-gray-600">{student.enrollmentNumber.slice(-3)}</p>
-                {classDuration === "2" ? (
-                  <div className="flex space-x-1">
-                    <input
-                      type="checkbox"
-                      checked={attendanceStatuses[student.enrollmentNumber]?.half1}
-                      onChange={(e) => handleCheckboxChange(student.enrollmentNumber, "half1", e.target.checked)}
-                      className="w-6 h-6 text-green-500 rounded-full focus:ring-2 focus:ring-green-500"
-                    />
-                    <span>Half 1</span>
+              <div>
+                <p className="text-red-600 font-semibold">{student.name.split(" ")[0]}</p>
+                <p className="text-gray-600 text-sm">#{student.enrollmentNumber.slice(-3)}</p>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center space-x-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={attendanceStatuses[student.enrollmentNumber]?.half1}
+                    onChange={(e) => handleCheckboxChange(student.enrollmentNumber, "half1", e.target.checked)}
+                    className="w-5 h-5 text-green-600 rounded focus:ring-2 focus:ring-green-400"
+                  />
+                  <span className="text-sm select-none">Half 1</span>
+                </label>
+
+                {classDuration === "2" && (
+                  <label className="flex items-center space-x-1 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={attendanceStatuses[student.enrollmentNumber]?.half2}
                       onChange={(e) => handleCheckboxChange(student.enrollmentNumber, "half2", e.target.checked)}
-                      className="w-6 h-6 text-green-500 rounded-full focus:ring-2 focus:ring-green-500"
+                      className="w-5 h-5 text-green-600 rounded focus:ring-2 focus:ring-green-400"
                     />
-                    <span>Half 2</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={attendanceStatuses[student.enrollmentNumber]?.half1}
-                      onChange={(e) => handleCheckboxChange(student.enrollmentNumber, "half1", e.target.checked)}
-                      className="w-6 h-6 text-green-500 rounded-full focus:ring-2 focus:ring-green-500"
-                    />
-                  </div>
+                    <span className="text-sm select-none">Half 2</span>
+                  </label>
                 )}
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* Action Buttons */}
-      <div className="space-x-4 text-center">
+      <section className="flex justify-center space-x-6 mb-8">
         <button
           onClick={handleClear}
-          className="bg-red-600 hover:bg-red-500 py-2 px-4 rounded text-white transition duration-300"
+          className="bg-red-600 hover:bg-red-700 transition rounded-full px-8 py-3 text-white font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
         >
           Clear
         </button>
         <button
           onClick={handleSubmit}
-          className="bg-green-600 hover:bg-green-500 py-2 px-4 rounded text-white transition duration-300"
+          className="bg-green-600 hover:bg-green-700 transition rounded-full px-8 py-3 text-white font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-green-400"
         >
           Submit
         </button>
-      </div>
+      </section>
+    </main>
+
+    {/* Footer space placeholder (same height as your fixed Footer) */}
+    <div className="h-14 bg-gray-800 text-white flex items-center justify-center text-sm shadow-inner z-10">
+      &copy; {new Date().getFullYear()} NIT Srinagar. All rights reserved.
     </div>
-  );
+  </div>
+);
+
+
+
 }

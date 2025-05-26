@@ -136,9 +136,36 @@ export default function ManageFaculties() {
     f.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+  <div
+    className="bg-gray-50"
+    style={{
+      paddingTop: "64px",       // approx header height (16px padding + 40px img + extra)
+      paddingBottom: "56px",    // approx footer height (py-4 + text size)
+      minHeight: "100vh",
+      overflowY: "auto",
+      WebkitOverflowScrolling: "touch", // smooth scroll on mobile
+    }}
+  >
     <ToastContainer position="top-center" autoClose={5000} theme="colored" transition={Bounce} />
+    <div className="max-w-4xl mx-auto px-4 py-6">
       <h1 className="text-3xl font-bold text-green-700 mb-4">
         Manage Faculties {dept ? `for ${dept}` : ""}
       </h1>
@@ -156,7 +183,7 @@ export default function ManageFaculties() {
       ) : filteredFaculties.length === 0 ? (
         <p className="text-center text-gray-600">No faculties found.</p>
       ) : (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-6">
           {filteredFaculties.map((faculty) => (
             <div
               key={faculty._id}
@@ -238,5 +265,7 @@ export default function ManageFaculties() {
         </div>
       )}
     </div>
-  );
+  </div>
+);
+
 }

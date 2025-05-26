@@ -206,52 +206,60 @@ export default function UpdateAttendance() {
     }));
   };
 
-  return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center py-10 px-4">
-      <ToastContainer />
-      <div className="text-center mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-red-600">
-          Update Attendance - {subject} ({course})
-        </h1>
-      </div>
 
-      <div className="bg-red-100 p-4 rounded-lg shadow w-full max-w-xl mx-auto mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <input
-          type="date"
-          className="p-3 border rounded w-full sm:w-1/2 bg-white text-gray-800"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-        />
-        <div className="flex flex-col sm:flex-row gap-2">
-          <button
-            onClick={fetchAttendance}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-          >
-            Load Attendance
-          </button>
-          <button
-            onClick={deleteAttendance}
-            className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition"
-          >
-            Delete Attendance
-          </button>
-        </div>
-      </div>
 
-      {students.length > 0 && (
-        <div className="w-full max-w-6xl">
-          <p className="text-lg font-medium text-gray-700 mb-4">
+
+
+
+
+
+return (
+  <div className="min-h-screen bg-white text-gray-900 flex flex-col pt-16 pb-16 px-4">
+    <ToastContainer />
+    <div className="text-center mb-6 sticky top-16 bg-white z-40 pt-2 pb-2 border-b border-gray-200">
+      <h1 className="text-xl sm:text-2xl font-bold text-red-600">
+        Update Attendance - {subject} ({course})
+      </h1>
+    </div>
+
+    <div className="bg-red-100 p-3 rounded-lg shadow w-full max-w-xl mx-auto mb-5 flex flex-col sm:flex-row gap-3 items-center justify-between sticky top-[calc(4rem+4px)] z-30">
+      <input
+        type="date"
+        className="p-3 border rounded w-full sm:w-1/2 bg-white text-gray-800"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}
+      />
+      <div className="flex flex-col sm:flex-row gap-2">
+        <button
+          onClick={fetchAttendance}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+        >
+          Load Attendance
+        </button>
+        <button
+          onClick={deleteAttendance}
+          className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition"
+        >
+          Delete Attendance
+        </button>
+      </div>
+    </div>
+
+    <div className="flex-1 overflow-y-auto max-w-6xl w-full mx-auto pb-4">
+      {students.length > 0 ? (
+        <>
+          <p className="text-lg font-medium text-gray-700 mb-4 px-2">
             Class Duration: {classDuration} Hour(s)
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-2">
             {students.map((student) => (
               <div
                 key={student.enrollmentNumber}
                 className="border p-4 rounded bg-red-50 shadow-sm"
               >
-                <p className="font-semibold">{student.name}</p>
-                <p className="text-sm text-gray-600">{student.enrollmentNumber}</p>
+                <p className="font-semibold truncate">{student.name}</p>
+                <p className="text-sm text-gray-600 truncate">{student.enrollmentNumber}</p>
                 <div className="flex flex-col mt-2 space-y-2 text-sm">
                   <label className="flex items-center space-x-2">
                     <input
@@ -260,9 +268,9 @@ export default function UpdateAttendance() {
                       onChange={(e) =>
                         handleCheckboxChange(student.enrollmentNumber, "half1", e.target.checked)
                       }
-                      className="w-4 h-4 text-red-600"
+                      className="w-5 h-5 text-red-600"
                     />
-                    <span>Half 1</span>
+                    <span className="select-none">Half 1</span>
                   </label>
                   {classDuration === "2" && (
                     <label className="flex items-center space-x-2">
@@ -272,9 +280,9 @@ export default function UpdateAttendance() {
                         onChange={(e) =>
                           handleCheckboxChange(student.enrollmentNumber, "half2", e.target.checked)
                         }
-                        className="w-4 h-4 text-red-600"
+                        className="w-5 h-5 text-red-600"
                       />
-                      <span>Half 2</span>
+                      <span className="select-none">Half 2</span>
                     </label>
                   )}
                 </div>
@@ -282,16 +290,24 @@ export default function UpdateAttendance() {
             ))}
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center mt-8 pb-16">
             <button
               onClick={handleSubmit}
-              className="mt-8 bg-green-600 hover:bg-green-700 transition text-white px-6 py-2 rounded"
+              className="bg-green-600 hover:bg-green-700 transition text-white px-6 py-3 rounded text-lg shadow-lg"
             >
               Update Attendance
             </button>
           </div>
-        </div>
+        </>
+      ) : (
+        <p className="text-center text-gray-500 mt-10">No students to display</p>
       )}
     </div>
-  );
+  </div>
+);
+
+
+
+
+
 }

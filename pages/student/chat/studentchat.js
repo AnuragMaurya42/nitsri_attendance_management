@@ -131,73 +131,86 @@ const ThinkingAnimation = () => (
     }
   };
 
+
+
+
+
+
+
+
+
+
+
+
   return (
-    <div className="flex flex-col h-screen max-w-3xl mx-auto bg-gradient-to-tr from-indigo-100 via-white to-indigo-50 shadow-2xl rounded-3xl overflow-hidden relative">
-      <header className="bg-indigo-600 text-white text-center py-5 shadow-lg flex flex-col items-center justify-center space-y-2">
-        <h1 className="text-3xl font-extrabold animate-fadeIn">💬 Student Chatbot</h1>
-        <p className="text-sm mt-1 font-light">Ask about your attendance & courses</p>
-      </header>
+  <div className="flex flex-col h-screen max-w-md mx-auto bg-gradient-to-tr from-indigo-100 via-white to-indigo-50 shadow-2xl rounded-3xl overflow-hidden relative">
+    <header className="bg-indigo-600 text-white text-center py-5 shadow-lg flex flex-col items-center justify-center space-y-2 fixed top-12 left-0 right-0 z-40">
+      <h1 className="text-3xl font-extrabold animate-fadeIn">💬 Student Chatbot</h1>
+      <p className="text-sm mt-1 font-light">Ask about your attendance & courses</p>
+    </header>
 
-      <div className="flex-1 p-6 overflow-y-auto space-y-4">
-        {messages.length === 0 && (
-          <div className="text-center text-indigo-700 text-lg font-semibold animate-fadeIn mt-10 px-4">
-            Hello! How can I assist you with your attendance queries today?
-          </div>
-        )}
+    <div className="flex-1 p-4 pt-36 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-indigo-200">
+      {messages.length === 0 && (
+        <div className="text-center text-indigo-700 text-lg font-semibold animate-fadeIn mt-10 px-4">
+          Hello! How can I assist you with your attendance queries today?
+        </div>
+      )}
 
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slideIn`}
-          >
-            <div
-              className={`max-w-md px-5 py-3 rounded-2xl transition-all duration-300 shadow-md ${
-                msg.role === 'user'
-                  ? 'bg-indigo-500 text-white rounded-br-none'
-                  : 'bg-white text-gray-800 rounded-bl-none border border-indigo-100'
-              }`}
-            >
-              {renderMessageContent(msg)}
-            </div>
-          </div>
-        ))}
-
-        {isThinking && (
-          <div className="flex justify-start px-5">
-            <div className="bg-white rounded-bl-none rounded-2xl px-5 py-3 shadow-md border border-indigo-100">
-              <ThinkingAnimation />
-            </div>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSend();
-        }}
-        className="flex gap-2 p-4 bg-white border-t border-indigo-200 shadow-inner"
-      >
-        <textarea
-          rows={1}
-          className="flex-1 px-4 py-2 rounded-xl border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none max-h-32 transition-all duration-200"
-          placeholder="Ask about your attendance..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={isThinking}
-        />
-        <button
-          type="submit"
-          disabled={isThinking}
-          className="bg-indigo-600 hover:bg-indigo-700 transition-colors text-white px-6 py-2 rounded-xl shadow disabled:opacity-50"
+      {messages.map((msg, i) => (
+        <div
+          key={i}
+          className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slideIn`}
         >
-          {isThinking ? 'Thinking...' : 'Send'}
-        </button>
-      </form>
+          <div
+            className={`max-w-md px-5 py-3 rounded-2xl transition-all duration-300 shadow-md ${
+              msg.role === 'user'
+                ? 'bg-indigo-500 text-white rounded-br-none'
+                : 'bg-white text-gray-800 rounded-bl-none border border-indigo-100'
+            }`}
+          >
+            {renderMessageContent(msg)}
+          </div>
+        </div>
+      ))}
+
+      {isThinking && (
+        <div className="flex justify-start px-5">
+          <div className="bg-white rounded-bl-none rounded-2xl px-5 py-3 shadow-md border border-indigo-100">
+            <ThinkingAnimation />
+          </div>
+        </div>
+      )}
+
+      <div ref={messagesEndRef} />
     </div>
-  );
+
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSend();
+      }}
+      className="flex gap-2 p-4 bg-white border-t border-indigo-200 shadow-inner fixed bottom-16 left-0 right-0 max-w-md mx-auto"
+      style={{ borderRadius: '0 0 1.5rem 1.5rem' }}
+    >
+      <textarea
+        rows={1}
+        className="flex-1 px-4 py-2 rounded-xl border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none max-h-32 transition-all duration-200"
+        placeholder="Ask about your attendance..."
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isThinking}
+      />
+      <button
+        type="submit"
+        disabled={isThinking}
+        className="bg-indigo-600 hover:bg-indigo-700 transition-colors text-white px-6 py-2 rounded-xl shadow disabled:opacity-50"
+      >
+        {isThinking ? 'Thinking...' : 'Send'}
+      </button>
+    </form>
+  </div>
+);
+
 };
 
 export default StudentChat;

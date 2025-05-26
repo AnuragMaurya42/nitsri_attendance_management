@@ -8,14 +8,15 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [courses, setCourses] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // New state for search
+  const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     if (localStorage.getItem("facultyToken")) {
       setLoading(true);
-      let token = localStorage.getItem("facultyToken");
-      const helper = async () => {
+      const token = localStorage.getItem("facultyToken");
+
+      const fetchData = async () => {
         try {
           const res = await fetch("/api/facultyapis/getfaculty", {
             method: "POST",
@@ -38,7 +39,7 @@ export default function Dashboard() {
               router.push("/login/faculty");
             }, 2000);
           } else {
-            localStorage.setItem('role', "faculty");
+            localStorage.setItem("role", "faculty");
             setUser(data.user);
 
             const coursesRes = await fetch("/api/facultyapis/getfacultycourses", {
@@ -48,6 +49,7 @@ export default function Dashboard() {
                 "Content-Type": "application/json",
               },
             });
+
             const coursesData = await coursesRes.json();
 
             if (coursesData.Success) {
@@ -72,7 +74,8 @@ export default function Dashboard() {
         }
         setLoading(false);
       };
-      helper();
+
+      fetchData();
     } else {
       router.push("/login/faculty");
     }
@@ -84,92 +87,102 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-gray-100 pt-20 pb-24 px-4 relative">
       <ToastContainer />
-
       {loading ? (
-        <div className="min-h-screen flex justify-center items-center">
+        <div className="h-[calc(100vh-6rem)] flex justify-center items-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-400"></div>
         </div>
       ) : (
-        <div>
-          <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto border border-gray-300">
-            <h1
-              className="text-5xl font-bold text-red-600 mb-5"
-              style={{ fontFamily: "Courier New, Courier, monospace" }}
-            >
+        <>
+          {/* Profile Card */}
+          <div className="bg-white rounded-xl p-5 mb-5 shadow-md border">
+            <h1 className="text-3xl text-center font-bold text-red-600 mb-2" style={{ fontFamily: "Courier New, Courier, monospace" }}>
               Faculty
             </h1>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{user?.name}</h2>
-            <p className="text-gray-600 mb-4">Department: {user?.department}</p>
+            <h2 className="text-xl text-center font-semibold text-gray-800">{user?.name}</h2>
+            <p className="text-center text-gray-600 mt-1">Department: {user?.department}</p>
           </div>
 
-          {/* Search bar */}
-          <div className="flex justify-center mb-6">
+          {/* Search Input */}
+          <div className="mb-4">
             <input
               type="text"
               placeholder="Search course name or code..."
-              className="w-4/5 sm:w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full px-4 py-3 text-sm border rounded-md focus:ring-2 focus:ring-red-400 focus:outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {filteredCourses.length === 0 ? (
-            <div className="text-center text-gray-600 text-xl">
-              No matching courses found.
-            </div>
-          ) : (
-            filteredCourses.map((course, index) => (
-              <div
-                key={index}
-                className="w-4/5 bg-white border border-gray-300 rounded-lg shadow-md mb-6 mx-auto"
-              >
-                <div className="flex flex-col items-center pb-10">
-                  <h5 className="mb-1 text-xl font-medium text-gray-900 mt-5">
+          {/* Scrollable Cards Section */}
+          <div className="h-[calc(100vh-24rem)] overflow-y-auto pr-2 custom-scrollbar">
+            {filteredCourses.length === 0 ? (
+              <div className="text-center text-gray-600 text-lg">No matching courses found.</div>
+            ) : (
+              filteredCourses.map((course, index) => (
+                <div
+                  key={index}
+                  className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-lg p-6 mb-6 border border-gray-200 transition-transform transform hover:scale-[1.02] duration-300"
+                >
+                  <h3 className="text-xl font-bold text-gray-800 mb-1 text-center">
                     {course.courseName} - {course.courseCode}
-                  </h5>
-                  <span className="text-sm text-gray-600">{course.courseFaculty}</span>
+                  </h3>
+                  <p className="text-sm text-center text-gray-500 mb-4 italic">
+                    Faculty: {course.courseFaculty}
+                  </p>
 
-                  <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`}>
-                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-                      Take Attendance
-                    </button>
-                  </a>
-                  <a href={`/faculty/updateAttendance/${course.courseCode}?course=${course.courseName}`}>
-                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-                      Update Attendance
-                    </button>
-                  </a>
-                  <a href={`/faculty/showSummary/${course.courseCode}?course=${course.courseName}`}>
-                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-                      Show Summary
-                    </button>
-                  </a>
-                  <a href={`/faculty/viewStudents?course=${course.courseCode}&courseName=${encodeURIComponent(course.courseName)}`}>
-                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-                      View Students
-                    </button>
-                  </a>
-                  <a href={`/admin/categoriseStudent?courseCode=${course.courseCode}`}>
-                    <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-                      Select Students
-                    </button>
-                  </a>
+
+<div className="grid grid-cols-2 gap-1 justify-items-center">
+  <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`}>
+    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+      Attendance
+    </button>
+  </a>
+  <a href={`/faculty/updateAttendance/${course.courseCode}?course=${course.courseName}`}>
+    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+      Update
+    </button>
+  </a>
+ 
+</div>
+
+<div className="grid grid-cols-2 gap-1 mt-2 justify-items-center">
+  <a href={`/faculty/viewStudents?course=${course.courseCode}&courseName=${encodeURIComponent(course.courseName)}`}>
+    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+      Students
+    </button>
+  </a>
+  <a href={`/admin/categoriseStudent?courseCode=${course.courseCode}`}>
+    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+      Select Student
+    </button>
+  </a>
+   <a href={`/faculty/showSummary/${course.courseCode}?course=${course.courseName}`}>
+    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+      Summary
+    </button>
+  </a>
+</div>
+
+
+
+
+                
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              ))
+            )}
+          </div>
+        </>
       )}
 
-      {/* Chatbot button */}
+      {/* Chatbot Button */}
       <Link href="/faculty/chat/facultychat">
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-24 right-5 z-50">
           <div className="relative group animate-bounce">
             <div className="absolute inset-0 rounded-full bg-red-600 opacity-70 blur-xl animate-ping"></div>
             <button
-              className="relative z-10 w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-red-700 text-white text-3xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300"
+              className="relative z-10 w-14 h-14 rounded-full bg-gradient-to-r from-red-500 to-red-700 text-white text-2xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300"
               title="Chatbot"
             >
               🤖

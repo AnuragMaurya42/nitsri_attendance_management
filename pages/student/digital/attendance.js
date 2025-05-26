@@ -31,10 +31,16 @@ export default function StudentBluetoothPage() {
     }
   }, []);
 
-  return (
-    <div className="p-6 text-center">
-      <h2 className="text-xl font-bold">Bluetooth Attendance</h2>
-      <p className="mt-2">Emitting your attendance signal...</p>
-    </div>
-  );
+return (
+  <div
+    className="pt-16 pb-16 px-4 min-h-screen bg-gradient-to-b from-blue-600 to-blue-400 text-white flex flex-col items-center justify-center"
+    style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+  >
+    <h2 className="text-2xl font-extrabold mb-4">Bluetooth Attendance</h2>
+    <p className="text-base max-w-xs text-center">
+      Emitting your attendance signal...
+    </p>
+  </div>
+);
+
 }
