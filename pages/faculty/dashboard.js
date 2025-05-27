@@ -9,6 +9,8 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null); // store clicked course
   const router = useRouter();
 
   useEffect(() => {
@@ -81,10 +83,36 @@ export default function Dashboard() {
     }
   }, [router]);
 
-  const filteredCourses = courses.filter((course) =>
-    course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Open modal and set selected course
+  const openAttendanceModal = (course) => {
+    setSelectedCourse(course);
+    setModalOpen(true);
+  };
+
+  // Navigate and close modal
+  const navigateTo = (type) => {
+    if (!selectedCourse) return;
+    const code = encodeURIComponent(selectedCourse.courseCode);
+    const name = encodeURIComponent(selectedCourse.courseName);
+    if (type === "manual") {
+      router.push(`/faculty/takeAttendence/${code}?course=${name}`);
+    } else if (type === "automatic") {
+      router.push(`/faculty/digital/${code}?course=${name}`);
+    }
+    setModalOpen(false);
+  };
+
+  // Close modal without action
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedCourse(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 pt-20 pb-24 px-4 relative">
@@ -97,11 +125,18 @@ export default function Dashboard() {
         <>
           {/* Profile Card */}
           <div className="bg-white rounded-xl p-5 mb-5 shadow-md border">
-            <h1 className="text-3xl text-center font-bold text-red-600 mb-2" style={{ fontFamily: "Courier New, Courier, monospace" }}>
+            <h1
+              className="text-3xl text-center font-bold text-red-600 mb-2"
+              style={{ fontFamily: "Courier New, Courier, monospace" }}
+            >
               Faculty
             </h1>
-            <h2 className="text-xl text-center font-semibold text-gray-800">{user?.name}</h2>
-            <p className="text-center text-gray-600 mt-1">Department: {user?.department}</p>
+            <h2 className="text-xl text-center font-semibold text-gray-800">
+              {user?.name}
+            </h2>
+            <p className="text-center text-gray-600 mt-1">
+              Department: {user?.department}
+            </p>
           </div>
 
           {/* Search Input */}
@@ -118,7 +153,9 @@ export default function Dashboard() {
           {/* Scrollable Cards Section */}
           <div className="h-[calc(100vh-24rem)] overflow-y-auto pr-2 custom-scrollbar">
             {filteredCourses.length === 0 ? (
-              <div className="text-center text-gray-600 text-lg">No matching courses found.</div>
+              <div className="text-center text-gray-600 text-lg">
+                No matching courses found.
+              </div>
             ) : (
               filteredCourses.map((course, index) => (
                 <div
@@ -132,47 +169,98 @@ export default function Dashboard() {
                     Faculty: {course.courseFaculty}
                   </p>
 
+                  <div className="grid grid-cols-2 gap-1 justify-items-center">
+                    <button
+                      onClick={() => openAttendanceModal(course)}
+                      className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700"
+                    >
+                      Attendance
+                    </button>
 
-<div className="grid grid-cols-2 gap-1 justify-items-center">
-  <a href={`/faculty/takeAttendence/${course.courseCode}?course=${course.courseName}`}>
-    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
-      Attendance
-    </button>
-  </a>
-  <a href={`/faculty/updateAttendance/${course.courseCode}?course=${course.courseName}`}>
-    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
-      Update
-    </button>
-  </a>
- 
-</div>
+                    <Link
+                      href={`/faculty/updateAttendance/${course.courseCode}?course=${encodeURIComponent(
+                        course.courseName
+                      )}`}
+                      passHref
+                    >
+                      <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+                        Update
+                      </button>
+                    </Link>
+                  </div>
 
-<div className="grid grid-cols-2 gap-1 mt-2 justify-items-center">
-  <a href={`/faculty/viewStudents?course=${course.courseCode}&courseName=${encodeURIComponent(course.courseName)}`}>
-    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
-      Students
-    </button>
-  </a>
-  <a href={`/admin/categoriseStudent?courseCode=${course.courseCode}`}>
-    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
-      Select Student
-    </button>
-  </a>
-   <a href={`/faculty/showSummary/${course.courseCode}?course=${course.courseName}`}>
-    <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
-      Summary
-    </button>
-  </a>
-</div>
-
-
-
-
-                
+                  <div className="grid grid-cols-2 gap-1 mt-2 justify-items-center">
+                    <Link
+                      href={`/faculty/viewStudents?course=${course.courseCode}&courseName=${encodeURIComponent(
+                        course.courseName
+                      )}`}
+                      passHref
+                    >
+                      <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+                        Students
+                      </button>
+                    </Link>
+                    <Link
+                      href={`/admin/categoriseStudent?courseCode=${course.courseCode}`}
+                      passHref
+                    >
+                      <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+                        Select Student
+                      </button>
+                    </Link>
+                    
+                    <Link
+                      href={`/faculty/showSummary/${course.courseCode}?course=${encodeURIComponent(
+                        course.courseName
+                      )}`}
+                      passHref
+                    >
+                      <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+                        Summary
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               ))
             )}
           </div>
+
+          {/* Modal */}
+          {modalOpen && selectedCourse && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg relative">
+                <h2 className="text-xl font-semibold mb-4 text-center">
+                  Select Attendance Mode
+                </h2>
+                <p className="mb-6 text-center">
+                  {selectedCourse.courseName} - {selectedCourse.courseCode}
+                </p>
+
+                <div className="flex justify-around">
+                  <button
+                    onClick={() => navigateTo("manual")}
+                    className="bg-red-600 text-white px-5 py-2 rounded hover:bg-red-700 font-semibold"
+                  >
+                    Manual
+                  </button>
+                  <button
+                    onClick={() => navigateTo("automatic")}
+                    className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 font-semibold"
+                  >
+                    Automatic
+                  </button>
+                </div>
+
+                <button
+                  onClick={closeModal}
+                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-lg font-bold"
+                  aria-label="Close modal"
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
 

@@ -45,7 +45,6 @@ export default function Dashboard() {
         localStorage.setItem("role", "student");
         setUser(data.user);
 
-        // ✅ Fetch only the enrolled courses
         const courseRes = await fetch("/api/studentapis/getEnrolledCourses", {
           method: "POST",
           body: JSON.stringify({ enrollmentNumber: data.user.enrollmentNumber }),
@@ -72,83 +71,79 @@ export default function Dashboard() {
     fetchData();
   }, [router]);
 
+  return (
+    <div className="min-h-screen bg-white text-black pt-16 pb-16 flex flex-col" style={{ height: '100vh' }}>
+      <ToastContainer theme="colored" transition={Bounce} />
 
-
-
-
-
-
-
-
-return (
-  <div className="min-h-screen bg-white text-black pt-16 pb-16 flex flex-col" style={{ height: '100vh' }}>
-    <ToastContainer theme="colored" transition={Bounce} />
-
-    {loading ? (
-      <div className="flex-grow flex justify-center items-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-400"></div>
-      </div>
-    ) : (
-      <>
-        <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full mb-6 mx-auto flex-shrink-0">
-          <h1
-            className="text-5xl font-bold text-red-600 mb-5"
-            style={{ fontFamily: "Courier New, Courier, monospace" }}
-          >
-            Student
-          </h1>
-          <h2 className="text-2xl font-bold mb-4">{user?.name || "Undefined"}</h2>
-          <p className="text-black mb-4">Enrollment: {user?.enrollmentNumber || "Undefined"}</p>
-          <p className="text-black mb-4">Batch: {user?.batch || "Undefined"}</p>
+      {loading ? (
+        <div className="flex-grow flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-red-400"></div>
         </div>
-
-        {/* Scrollable Cards Container */}
-        <div className="flex-grow overflow-y-auto px-4 space-y-6">
-          {courses.length === 0 ? (
-            <div className="text-center text-black">No courses assigned to you.</div>
-          ) : (
-            courses.map((course, index) => (
-              <div
-                key={index}
-                className="w-full max-w-md bg-red-200 border border-red-500 rounded-lg shadow-md mx-auto"
-              >
-                <div className="flex flex-col items-center pb-10">
-                  <h5 className="mb-1 mt-5 text-xl font-medium text-black">{course.courseName}</h5>
-                  <span className="text-sm text-gray-600">{course.courseFaculty}</span>
-                  <button
-                    onClick={() =>
-                      (window.location.href = `/student/${course.courseCode}?course=${course.courseName}&enroll=${user.enrollmentNumber}`)
-                    }
-                    className="mt-4 px-4 py-2 text-white bg-red-600 border border-red-500 rounded-lg hover:bg-red-700"
-                  >
-                    Go to {course.courseName}
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Floating Chatbot Button */}
-        <div
-          onClick={() => router.push("/student/chat/studentchat")}
-          className="fixed bottom-20 right-5 z-50 cursor-pointer group"
-        >
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20 animate-bounce transition-transform duration-300">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/4712/4712038.png"
-              alt="Chatbot"
-              className="w-full h-full rounded-full shadow-xl"
-            />
-            <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs sm:text-sm bg-black text-white px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Chatbot
-            </span>
+      ) : (
+        <>
+          {/* Student Info Card */}
+          <div className="bg-white shadow-md rounded-lg p-4 max-w-xs w-full mb-4 mx-auto text-center">
+            <h1 className="text-3xl font-bold text-red-600 mb-2" style={{ fontFamily: "Courier New, Courier, monospace" }}>
+              Student
+            </h1>
+            <h2 className="text-lg font-bold mb-1">{user?.name || "Undefined"}</h2>
+            <p className="text-black text-sm">Enrollment: {user?.enrollmentNumber || "Undefined"}</p>
+            <p className="text-black text-sm">Batch: {user?.batch || "Undefined"}</p>
           </div>
-        </div>
-      </>
-    )}
-  </div>
-);
 
+          {/* Scrollable Courses */}
+          <div className="flex-grow overflow-y-auto px-4 space-y-4 pb-4">
+            {courses.length === 0 ? (
+              <div className="text-center text-black text-sm">No courses assigned to you.</div>
+            ) : (
+              courses.map((course, index) => (
+                <div
+                  key={index}
+                  className="w-full max-w-xs bg-red-100 border border-red-400 rounded-lg shadow-md mx-auto p-4 text-center"
+                >
+                  <h5 className="text-base font-semibold text-black">{course.courseName}</h5>
+                  <p className="text-xs text-gray-700 mb-2">{course.courseFaculty}</p>
+                  <div className="flex justify-center space-x-2">
+                    <button
+                      onClick={() =>
+                        (window.location.href = `/student/${course.courseCode}?course=${course.courseName}&enroll=${user.enrollmentNumber}`)
+                      }
+                      className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                    >
+                      Go to Dashboard
+                    </button>
+                    <button
+                      onClick={() =>
+                        (window.location.href = `/student/digital/${course.courseCode}?course=${course.courseName}`)
+                      }
+                      className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                      Mark Your Attendance
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
 
+          {/* Floating Chatbot Button */}
+          <div
+            onClick={() => router.push("/student/chat/studentchat")}
+            className="fixed bottom-20 right-5 z-50 cursor-pointer group"
+          >
+            <div className="relative w-14 h-14 animate-bounce transition-transform duration-300">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/4712/4712038.png"
+                alt="Chatbot"
+                className="w-full h-full rounded-full shadow-xl"
+              />
+              <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-[10px] bg-black text-white px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Chatbot
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
