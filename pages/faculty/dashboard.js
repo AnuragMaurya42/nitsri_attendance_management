@@ -151,7 +151,7 @@ export default function Dashboard() {
           </div>
 
           {/* Scrollable Cards Section */}
-          <div className="h-[calc(100vh-24rem)] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="h-[calc(100vh-18rem)] overflow-y-auto pr-2 custom-scrollbar">
             {filteredCourses.length === 0 ? (
               <div className="text-center text-gray-600 text-lg">
                 No matching courses found.
@@ -266,7 +266,7 @@ export default function Dashboard() {
 
       {/* Chatbot Button */}
       <Link href="/faculty/chat/facultychat">
-        <div className="fixed bottom-24 right-5 z-50">
+        <div className="fixed bottom-14 right-5 z-50">
           <div className="relative group animate-bounce">
             <div className="absolute inset-0 rounded-full bg-red-600 opacity-70 blur-xl animate-ping"></div>
             <button

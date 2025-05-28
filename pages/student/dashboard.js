@@ -129,7 +129,7 @@ export default function Dashboard() {
           {/* Floating Chatbot Button */}
           <div
             onClick={() => router.push("/student/chat/studentchat")}
-            className="fixed bottom-20 right-5 z-50 cursor-pointer group"
+            className="fixed bottom-10 right-8 z-20 cursor-pointer group"
           >
             <div className="relative w-14 h-14 animate-bounce transition-transform duration-300">
               <img

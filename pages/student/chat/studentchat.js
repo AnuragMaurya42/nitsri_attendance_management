@@ -201,107 +201,179 @@ const StudentChat = () => {
     }
   };
 
-  return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-gradient-to-tr from-indigo-100 via-white to-indigo-50 shadow-2xl rounded-3xl overflow-hidden relative">
-      <header className="bg-indigo-600 text-white text-center py-5 shadow-lg flex flex-col items-center justify-center space-y-2 fixed top-12 left-0 right-0 z-40">
-        <h1 className="text-3xl font-extrabold animate-fadeIn">💬 Student Chatbot</h1>
-        <p className="text-sm mt-1 font-light">Ask about your attendance & courses</p>
-      </header>
-      
-      <div className="flex-1 p-4 pt-36 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-indigo-200">
-        {messages.length === 0 && (
-          <div className="text-center text-indigo-700 text-lg font-semibold animate-fadeIn mt-10 px-4">
-            Hello! How can I assist you with your attendance queries today?
-          </div>
-        )}
 
-        {messages.map((msg, i) => (
+
+
+
+
+return (
+  <div className="flex flex-col h-screen max-w-md mx-auto bg-gradient-to-tr from-indigo-100 via-white to-indigo-50 shadow-2xl rounded-3xl overflow-hidden relative">
+    
+    {/* Thinner Header */}
+    <header className="bg-indigo-600 text-white text-center py-1 shadow-lg flex flex-col items-center justify-center space-y-1 fixed top-12 left-0 right-0 z-40">
+      <h1 className="text-2xl font-bold animate-fadeIn">💬 Student Chatbot</h1>
+      <p className="text-xs font-light">Ask about your attendance & courses</p>
+    </header>
+
+    {/* Messages Area */}
+    <div className="flex-1 p-4 pt-32 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-indigo-200">
+      {messages.length === 0 && (
+        <div className="text-center text-indigo-700 text-lg font-semibold animate-fadeIn mt-10 px-4">
+          Hello! How can I assist you with your attendance queries today?
+        </div>
+      )}
+
+      {messages.map((msg, i) => (
+        <div
+          key={i}
+          className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slideIn`}
+        >
           <div
-            key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slideIn`}
+            className={`max-w-md px-5 py-3 rounded-2xl transition-all duration-300 shadow-md ${
+              msg.role === 'user'
+                ? 'bg-indigo-500 text-white rounded-br-none'
+                : 'bg-white text-gray-800 rounded-bl-none border border-indigo-100'
+            }`}
           >
-            <div
-              className={`max-w-md px-5 py-3 rounded-2xl transition-all duration-300 shadow-md ${
-                msg.role === 'user'
-                  ? 'bg-indigo-500 text-white rounded-br-none'
-                  : 'bg-white text-gray-800 rounded-bl-none border border-indigo-100'
-              }`}
-            >
-              {renderMessageContent(msg)}
-            </div>
+            {renderMessageContent(msg)}
           </div>
-        ))}
+        </div>
+      ))}
 
-        {isThinking && (
-          <div className="flex justify-start px-5">
-            <div className="bg-white rounded-bl-none rounded-2xl px-5 py-3 shadow-md border border-indigo-100">
-              <ThinkingAnimation />
-            </div>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Chat form with text input, mic and TTS buttons */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSend();
-        }}
-        className="flex gap-2 p-4 bg-white border-t border-indigo-200 shadow-inner fixed bottom-16 left-0 right-0 max-w-md mx-auto"
-        style={{ borderRadius: '0 0 1.5rem 1.5rem' }}
-      >
-        <button
-          type="button"
-          onClick={startVoiceRecognition}
-          className="px-3 py-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors focus:outline-none"
-          title="Record Voice"
-        >
-          🎙️
-        </button>
-        <textarea
-          rows={1}
-          className="flex-1 px-4 py-2 rounded-xl border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none max-h-32 transition-all duration-200"
-          placeholder="Ask about your attendance..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={isThinking}
-        />
-        <button
-          type="button"
-          onClick={handleTTS}
-          className="px-4 py-2 rounded-xl bg-yellow-500 text-white hover:bg-yellow-600 transition-colors focus:outline-none"
-          title="Text-to-Speech"
-        >
-          {ttsState === 'idle' ? 'Read' : ttsState === 'reading' ? 'Pause' : 'Resume'}
-        </button>
-        <button
-          type="submit"
-          disabled={isThinking}
-          className="bg-indigo-600 hover:bg-indigo-700 transition-colors text-white px-6 py-2 rounded-xl shadow disabled:opacity-50"
-        >
-          {isThinking ? 'Thinking...' : 'Send'}
-        </button>
-      </form>
-
-      {/* Voice Recording Modal */}
-      {showVoiceModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full text-center">
-            <h2 className="text-xl font-bold mb-4">Listening...</h2>
-            <p className="mb-4 text-gray-700">{voiceText || 'Speak now...'}</p>
-            <button
-              onClick={stopVoiceRecognition}
-              className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-full transition-colors focus:outline-none"
-            >
-              Stop Recording
-            </button>
+      {isThinking && (
+        <div className="flex justify-start px-5">
+          <div className="bg-white rounded-bl-none rounded-2xl px-5 py-3 shadow-md border border-indigo-100">
+            <ThinkingAnimation />
           </div>
         </div>
       )}
-    </div>
-  );
-};
 
+      <div ref={messagesEndRef} />
+    </div>
+
+    {/* Chat Form */}
+   <form
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleSend();
+  }}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '2px',
+    padding: '8px 9px',
+    backgroundColor: 'white',
+    borderTop: '1px solid #c7d2fe', // indigo-200
+    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
+    borderRadius: '0 0 24px 24px',
+    position: 'fixed',
+    bottom: '35px',
+    left: 0,
+    right: 0,
+    maxWidth: '384px',
+    margin: '0 auto',
+    zIndex: 30,
+  }}
+>
+  {/* Mic Button */}
+  <button
+    type="button"
+    onClick={startVoiceRecognition}
+    style={{
+      width: '36px',
+      height: '36px',
+      borderRadius: '9999px',
+      backgroundColor: '#e0e7ff', // indigo-100
+      color: '#4338ca', // indigo-600
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'background-color 0.2s',
+      cursor: 'pointer',
+    }}
+    title="Record Voice"
+  >
+    🎙️
+  </button>
+
+  {/* Input */}
+  <textarea
+    rows={1}
+    style={{
+      marginTop: '6px',
+      resize: 'none',
+      maxHeight: '112px',
+      flexGrow: 1,
+      padding: '8px 12px',
+      borderRadius: '12px',
+      border: '1px solid #c7d2fe', // indigo-300
+      fontSize: '0.875rem',
+      outline: 'none',
+    }}
+    className="focus:ring-indigo-400"
+    placeholder="Ask about your attendance..."
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    disabled={isThinking}
+  />
+
+  {/* TTS Button */}
+  <button
+    type="button"
+    onClick={handleTTS}
+    style={{
+      width: '36px',
+      height: '36px',
+      borderRadius: '9999px',
+      backgroundColor: '#fbbf24', // yellow-400
+      color: 'white',
+      cursor: 'pointer',
+      transition: 'background-color 0.2s',
+    }}
+    title="Text-to-Speech"
+  >
+    {ttsState === 'idle' ? '🗣' : ttsState === 'reading' ? '⏸' : '▶️'}
+  </button>
+
+  {/* Send Button */}
+  <button
+    type="submit"
+    disabled={isThinking}
+    style={{
+      width: '36px',
+      height: '36px',
+      borderRadius: '9999px',
+      backgroundColor: isThinking ? '#a5b4fc' : '#4338ca', // indigo-600 & disabled color
+      color: 'white',
+      cursor: isThinking ? 'not-allowed' : 'pointer',
+      transition: 'background-color 0.2s',
+      opacity: isThinking ? 0.5 : 1,
+    }}
+    title="Send"
+  >
+    {isThinking ? '⏳' : '➡️'}
+  </button>
+</form>
+
+
+    {/* Voice Recording Modal */}
+    {showVoiceModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl p-6 max-w-sm w-full text-center">
+          <h2 className="text-xl font-bold mb-4">Listening...</h2>
+          <p className="mb-4 text-gray-700">{voiceText || 'Speak now...'}</p>
+          <button
+            onClick={stopVoiceRecognition}
+            className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-full transition-colors focus:outline-none"
+          >
+            Stop Recording
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+}
 export default StudentChat;
