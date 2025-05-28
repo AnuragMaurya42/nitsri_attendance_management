@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 
-export default function Navbar() {
+const Navbar = () => {
   const router = useRouter();
 
   const handleLogout = () => {
@@ -19,13 +19,9 @@ export default function Navbar() {
   const isRoot = router.pathname === "/";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-gray-800 px-4 py-2 flex items-center justify-between z-50 shadow">
-      {/* Home button */}
+    <nav className="fixed top-0 left-0 right-0 bg-gray-800 px-4 py-2 flex items-center justify-between z-50 shadow h-14">
       {!isRoot && (
-        <div
-          onClick={() => router.push("/")}
-          className="flex items-center cursor-pointer"
-        >
+        <div onClick={() => router.push("/")} className="flex items-center cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -44,7 +40,6 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Logo */}
       <div className="flex-grow flex justify-center">
         <img
           src="/logo.png"
@@ -53,12 +48,8 @@ export default function Navbar() {
         />
       </div>
 
-      {/* Logout */}
       {!isRoot && (
-        <div
-          onClick={handleLogout}
-          className="flex items-center cursor-pointer"
-        >
+        <div onClick={handleLogout} className="flex items-center cursor-pointer">
           <span className="mr-1 font-medium text-white text-sm">Logout</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -78,4 +69,6 @@ export default function Navbar() {
       )}
     </nav>
   );
-}
+};
+
+export default Navbar;
