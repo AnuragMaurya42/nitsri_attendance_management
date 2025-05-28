@@ -137,7 +137,7 @@ export default function FacultyChat() {
           />
           <button onClick={() => handleSend()} className="send-btn">Send</button>
           <button onClick={() => setShowVoicePopup(true)} className="voice-btn">🎤 Voice</button>
-          <button onClick={handleSpeak} className="speak-btn">🔊 Speak</button>
+          {/* <button onClick={handleSpeak} className="speak-btn">🔊 Speak</button> */}
         </div>
       </footer>
 

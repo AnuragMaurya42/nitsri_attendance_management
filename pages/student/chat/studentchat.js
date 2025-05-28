@@ -319,7 +319,7 @@ return (
   />
 
   {/* TTS Button */}
-  <button
+  {/* <button
     type="button"
     onClick={handleTTS}
     style={{
@@ -334,7 +334,7 @@ return (
     title="Text-to-Speech"
   >
     {ttsState === 'idle' ? '🗣' : ttsState === 'reading' ? '⏸' : '▶️'}
-  </button>
+  </button> */}
 
   {/* Send Button */}
   <button
