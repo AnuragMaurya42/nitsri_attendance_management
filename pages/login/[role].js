@@ -229,48 +229,53 @@ function LoginPage() {
     setLoading(false);
   }, [role, router]);
 
-  return (
-    <div
-      className="relative flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${image.src})` }}
-    >
-      {/* Dark overlay for contrast */}
-      <div className="absolute inset-0 bg-black opacity-60"></div>
 
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-        transition={Bounce}
-      />
+  
+ return (
+  <div
+    className="relative flex justify-center min-h-screen bg-cover bg-center bg-no-repeat"
+    style={{
+      backgroundImage: `url(${image.src})`,
+      paddingTop: "60px",
+      alignItems: "flex-start"
+    }}
+  >
+    {/* Dark overlay for contrast */}
+    <div className="absolute inset-0 bg-black opacity-60"></div>
 
-      {loading ? (
-        <div className="relative z-10 flex justify-center items-center min-h-screen">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-400"></div>
+    <ToastContainer
+      position="top-center"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="colored"
+      transition={Bounce}
+    />
+
+    {loading ? (
+      <div className="relative z-10 flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-400"></div>
+      </div>
+    ) : (
+      <div className="relative z-10 w-full max-w-xs p-8 bg-gray-800 bg-opacity-90 rounded-3xl shadow-2xl min-w-[320px]">
+        <div className="flex justify-center mb-6">
+          <img
+            src="/images.png"
+            alt="Logo"
+            className="w-20 h-20 rounded-full shadow-lg object-cover"
+          />
         </div>
-      ) : (
-        <div className="relative z-10 w-full max-w-xs p-8 bg-gray-800 bg-opacity-90 rounded-3xl shadow-2xl min-w-[320px]">
-          <div className="flex justify-center mb-6">
-            <img
-              src="/images.png"
-              alt="Logo"
-              className="w-20 h-20 rounded-full shadow-lg object-cover"
-            />
-          </div>
 
-          <h2 className="mb-8 text-3xl font-extrabold text-center text-white tracking-wide">
-            {role
-              ? `${role.charAt(0).toUpperCase()}${role.slice(1)} Login`
-              : "Login"}
-          </h2>
-
+        <h2 className="mb-8 text-3xl font-extrabold text-center text-white tracking-wide">
+          {role
+            ? `${role.charAt(0).toUpperCase()}${role.slice(1)} Login`
+            : "Login"}
+        </h2>
           <form>
             <div className="mb-6">
               <label

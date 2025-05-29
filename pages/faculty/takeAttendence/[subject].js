@@ -126,15 +126,15 @@ export default function TakeAttendance() {
 
 return (
   <div
-    className="flex flex-col h-screen max-w-md mx-auto bg-white text-gray-900 font-sans shadow-md rounded-lg overflow-hidden"
+    className="flex flex-col h-screen max-w-md mx-auto bg-gradient-to-r from-red-400 to-pink-500 text-gray-900 font-sans shadow-md rounded-lg overflow-hidden"
     style={{
-      paddingTop: '60px',   // Navbar height approx
-      paddingBottom: '60px' // Footer height approx
+      paddingTop: '10px',   // Navbar height approx
+      paddingBottom: '30px' // Footer height approx
     }}
   >
 
     {/* Header */}
-    <header className="h-12 flex items-center justify-center bg-gray-900 text-white font-semibold text-base shadow-md z-10">
+    <header className="h-12 flex items-center justify-center bg-gradient-to-r from-red-400 to-pink-500text-white font-bold text-base shadow-md z-10">
       Take Attendance
     </header>
 

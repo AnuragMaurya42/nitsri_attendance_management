@@ -21,7 +21,10 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 bg-gray-800 px-4 py-2 flex items-center justify-between z-50 shadow h-14">
       {!isRoot && (
-        <div onClick={() => router.push("/")} className="flex items-center cursor-pointer">
+        <div
+          onClick={() => router.push("/")}
+          className="flex items-center cursor-pointer"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

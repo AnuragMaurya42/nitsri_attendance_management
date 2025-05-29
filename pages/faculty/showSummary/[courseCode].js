@@ -152,72 +152,117 @@ function AttendanceSummaryPage() {
 
 
 
+
+
+
+
+
+
+
+
 return (
-  <div className="flex flex-col items-center bg-white pt-16 pb-20 min-h-screen"> 
-    {/* pt-16 and pb-20 to offset fixed header/footer height */}
+  <div className="flex flex-col items-center bg-white pt-9 pb-10 min-h-screen mx-3">
     <ToastContainer position="top-center" autoClose={5000} theme="colored" transition={Bounce} />
-    <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-lg border border-red-600
-                    overflow-y-auto flex flex-col"
-         style={{ maxHeight: 'calc(100vh - 6rem)' }}  /* max height minus header(4rem)+footer(4rem), approx */
+    <div
+      className="w-full max-w-md bg-white p-6 rounded-2xl shadow-lg border border-red-600 overflow-y-auto flex flex-col"
+      style={{ maxHeight: "calc(100vh - 6rem)" }}
     >
-      <h2 className="text-2xl font-extrabold text-center text-red-600 mb-6">
+      <h2
+        className="font-extrabold text-center mb-8 text-xl"
+        style={{
+          marginBottom: "2rem",
+          background: "linear-gradient(90deg, rgb(0, 10, 202), rgb(4, 0, 84))",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
         Attendance Summary for {course}
       </h2>
 
       {/* Filters */}
       <div className="mb-6 space-y-4">
-        <div>
-          <label className="block text-sm font-semibold text-red-600 mb-1">Start Date</label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 bg-gray-50 text-gray-900"
-          />
+        {/* Date inputs arranged horizontally */}
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-red-700 mb-1">
+              Start Date
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 text-gray-900"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-red-700 mb-1">
+              End Date
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 text-gray-900"
+            />
+          </div>
         </div>
+        {/* Minimum Percentage easily visible on its own row */}
         <div>
-          <label className="block text-sm font-semibold text-red-600 mb-1">End Date</label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 bg-gray-50 text-gray-900"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-red-600 mb-1">Min Percentage</label>
+          <label className="block text-sm font-semibold text-red-700 mb-1">
+            Min Percentage
+          </label>
           <input
             type="number"
             value={minPercentage}
             onChange={(e) => setMinPercentage(e.target.value)}
             min="0"
             max="100"
-            className="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 bg-gray-50 text-gray-900"
             placeholder="0 to 100"
+            className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 text-gray-900"
           />
         </div>
       </div>
 
-      {/* Buttons */}
-     <div className="flex space-x-3 mb-4">
-  <button
-    onClick={handleFilter}
-    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none shadow-md text-sm"
-  >
-    Check Attendance
-  </button>
-  <button
-    onClick={handleDownloadPDF}
-    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none shadow-md text-sm"
-  >
-    Download PDF
-  </button>
-</div>
+      {/* Buttons with gradient backgrounds */}
+      <div className="flex space-x-3 mb-4">
+        <button
+          onClick={handleFilter}
+          className="flex-1 px-3 py-2 text-white rounded-lg shadow-md text-sm transition-colors duration-300 ease-in-out focus:outline-none"
+          style={{
+            background: "linear-gradient(90deg, #4B0082, #8A2BE2)",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.background = "#B22222")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background =
+              "linear-gradient(90deg, #4B0082, #8A2BE2)")
+          }
+        >
+          Check Attendance
+        </button>
+        <button
+          onClick={handleDownloadPDF}
+          className="flex-1 px-3 py-2 text-white rounded-lg shadow-md text-sm transition-colors duration-300 ease-in-out focus:outline-none"
+          style={{
+            background: "linear-gradient(90deg, #32CD32, #228B22)",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.background = "#006400")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background =
+              "linear-gradient(90deg, #32CD32, #228B22)")
+          }
+        >
+          Download PDF
+        </button>
+      </div>
 
-      {/* Table */}
+      {/* Data Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-inner bg-gray-50">
         <table className="w-full text-left text-sm text-gray-700">
-          <thead className="bg-red-600 text-white rounded-t-lg">
+          <thead className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Enrollment</th>
@@ -251,6 +296,12 @@ return (
     </div>
   </div>
 );
+
+
+
+
+
+
 
 }
 

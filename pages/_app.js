@@ -1,22 +1,21 @@
-import "@/styles/globals.css";
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
+import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <>
       <Navbar />
-      
-      {/* 
-        main content me bottom padding itni do jitni footer ki height hai
-        taaki footer ke niche content na jaye 
-      */}
-      <main className="flex-grow pt-4 pb-2 bg-gradient-to-br from-blue-100 to-orange-100 overflow-auto">
+
+      {/* Scrollable main content with padding to avoid overlap */}
+      <div
+        className="pt-14 pb-6 bg-gradient-to-br from-blue-100 to-orange-100 overflow-y-auto"
+        style={{ minHeight: "100vh" }}
+      >
         <Component {...pageProps} />
-      </main>
-      
-      {/* Footer ko fixed bottom pe rakhna */}
+      </div>
+
       <Footer />
-    </div>
+    </>
   );
 }

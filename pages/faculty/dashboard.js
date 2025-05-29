@@ -10,7 +10,7 @@ export default function Dashboard() {
   const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState(null); // store clicked course
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,9 +23,7 @@ export default function Dashboard() {
           const res = await fetch("/api/facultyapis/getfaculty", {
             method: "POST",
             body: JSON.stringify({ token }),
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
           });
           const data = await res.json();
 
@@ -37,9 +35,7 @@ export default function Dashboard() {
               theme: "colored",
               transition: Bounce,
             });
-            setTimeout(() => {
-              router.push("/login/faculty");
-            }, 2000);
+            setTimeout(() => router.push("/login/faculty"), 2000);
           } else {
             localStorage.setItem("role", "faculty");
             setUser(data.user);
@@ -47,9 +43,7 @@ export default function Dashboard() {
             const coursesRes = await fetch("/api/facultyapis/getfacultycourses", {
               method: "POST",
               body: JSON.stringify({ _id: data.user._id }),
-              headers: {
-                "Content-Type": "application/json",
-              },
+              headers: { "Content-Type": "application/json" },
             });
 
             const coursesData = await coursesRes.json();
@@ -89,13 +83,11 @@ export default function Dashboard() {
       course.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Open modal and set selected course
   const openAttendanceModal = (course) => {
     setSelectedCourse(course);
     setModalOpen(true);
   };
 
-  // Navigate and close modal
   const navigateTo = (type) => {
     if (!selectedCourse) return;
     const code = encodeURIComponent(selectedCourse.courseCode);
@@ -108,45 +100,51 @@ export default function Dashboard() {
     setModalOpen(false);
   };
 
-  // Close modal without action
   const closeModal = () => {
     setModalOpen(false);
     setSelectedCourse(null);
   };
 
+
+
+
+
+
   return (
-    <div className="min-h-screen bg-gray-100 pt-20 pb-24 px-4 relative">
+    <div className="min-h-screen bg-gradient-to-tr from-pink-50 via-purple-50 to-indigo-50 pt-10 pb-14 px-4 relative">
       <ToastContainer />
       {loading ? (
         <div className="h-[calc(100vh-6rem)] flex justify-center items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-400"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-pink-500"></div>
         </div>
       ) : (
         <>
           {/* Profile Card */}
-          <div className="bg-white rounded-xl p-5 mb-5 shadow-md border">
-            <h1
-              className="text-3xl text-center font-bold text-red-600 mb-2"
-              style={{ fontFamily: "Courier New, Courier, monospace" }}
-            >
-              Faculty
-            </h1>
-            <h2 className="text-xl text-center font-semibold text-gray-800">
-              {user?.name}
-            </h2>
-            <p className="text-center text-gray-600 mt-1">
-              Department: {user?.department}
-            </p>
-          </div>
+         <div className="bg-gradient-to-r from-green-200 to-green-300 rounded-xl p-5 mb-5 shadow-lg border border-pink-600">
+  <h1
+    className="text-2xl text-center font-bold mb-2 tracking-wide text-gray-900"
+    style={{ fontFamily: "Courier New, Courier, monospace" }}
+  >
+    Faculty
+  </h1>
+  <h2 className="text-lg text-center font-semibold text-gray-800">
+    {user?.name}
+  </h2>
+  <p className="text-center mt-1 italic text-gray-700 font-medium">
+    Department: {user?.department}
+  </p>
+</div>
+
 
           {/* Search Input */}
           <div className="mb-4">
             <input
               type="text"
               placeholder="Search course name or code..."
-              className="w-full px-4 py-3 text-sm border rounded-md focus:ring-2 focus:ring-red-400 focus:outline-none"
+              className="w-full px-3 py-2 text-sm rounded-md border border-pink-300 focus:ring-2 focus:ring-pink-400 focus:outline-none shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ fontSize: "0.9rem" }}
             />
           </div>
 
@@ -160,19 +158,20 @@ export default function Dashboard() {
               filteredCourses.map((course, index) => (
                 <div
                   key={index}
-                  className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-lg p-6 mb-6 border border-gray-200 transition-transform transform hover:scale-[1.02] duration-300"
+                  className="bg-white via-purple-100 to-indigo-100 rounded-xl shadow-xl p-5 mb-5 border border-purple-300 "
+                  style={{ fontSize: "0.95rem" }}
                 >
-                  <h3 className="text-xl font-bold text-gray-800 mb-1 text-center">
+                  <h3 className="text-lg font-extrabold text-purple-800 mb-1 text-center">
                     {course.courseName} - {course.courseCode}
                   </h3>
-                  <p className="text-sm text-center text-gray-500 mb-4 italic">
+                  <p className="text-xs text-center text-purple-700 mb-3 italic">
                     Faculty: {course.courseFaculty}
                   </p>
 
                   <div className="grid grid-cols-2 gap-1 justify-items-center">
                     <button
                       onClick={() => openAttendanceModal(course)}
-                      className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700"
+                      className="w-24 text-xs py-2 rounded-md font-semibold shadow text-white bg-gradient-to-r from-red-400 to-pink-600 hover:from-pink-600 hover:to-red-400 transition-colors"
                     >
                       Attendance
                     </button>
@@ -183,7 +182,7 @@ export default function Dashboard() {
                       )}`}
                       passHref
                     >
-                      <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+                      <button className="w-24 text-xs py-2 rounded-md font-semibold shadow text-white bg-gradient-to-r from-blue-400 to-indigo-600 hover:from-indigo-600 hover:to-blue-400 transition-colors">
                         Update
                       </button>
                     </Link>
@@ -196,26 +195,27 @@ export default function Dashboard() {
                       )}`}
                       passHref
                     >
-                      <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+                      <button className="w-24 text-xs py-2 rounded-md font-semibold shadow text-white bg-gradient-to-r from-red-400 to-pink-600 hover:from-pink-600 hover:to-red-400 transition-colors">
                         Students
                       </button>
                     </Link>
+
                     <Link
                       href={`/admin/categoriseStudent?courseCode=${course.courseCode}`}
                       passHref
                     >
-                      <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+                      <button className="w-24 text-xs py-2 rounded-md font-semibold shadow text-white bg-gradient-to-r from-blue-400 to-indigo-600 hover:from-indigo-600 hover:to-blue-400 transition-colors">
                         Select Student
                       </button>
                     </Link>
-                    
+
                     <Link
                       href={`/faculty/showSummary/${course.courseCode}?course=${encodeURIComponent(
                         course.courseName
                       )}`}
                       passHref
                     >
-                      <button className="w-28 text-sm py-2 bg-red-600 text-white rounded-md font-semibold shadow hover:bg-red-700">
+                      <button className="w-24 text-xs py-2 rounded-md font-semibold shadow text-white bg-gradient-to-r from-red-400 to-pink-600 hover:from-pink-600 hover:to-red-400 transition-colors">
                         Summary
                       </button>
                     </Link>
@@ -227,25 +227,27 @@ export default function Dashboard() {
 
           {/* Modal */}
           {modalOpen && selectedCourse && (
-            <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-              <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg relative">
-                <h2 className="text-xl font-semibold mb-4 text-center">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-2xl relative">
+                <h2 className="text-xl font-semibold mb-4 text-center text-purple-800">
                   Select Attendance Mode
                 </h2>
-                <p className="mb-6 text-center">
+                <p className="mb-6 text-center font-medium text-purple-700">
                   {selectedCourse.courseName} - {selectedCourse.courseCode}
                 </p>
 
                 <div className="flex justify-around">
                   <button
                     onClick={() => navigateTo("manual")}
-                    className="bg-red-600 text-white px-5 py-2 rounded hover:bg-red-700 font-semibold"
+                    className="px-6 py-2 rounded bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold shadow hover:from-pink-600 hover:to-red-500 transition-colors"
+                    style={{ fontSize: "0.9rem" }}
                   >
                     Manual
                   </button>
                   <button
                     onClick={() => navigateTo("automatic")}
-                    className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 font-semibold"
+                    className="px-6 py-2 rounded bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow hover:from-green-500 hover:to-green-600 transition-colors"
+                    style={{ fontSize: "0.9rem" }}
                   >
                     Automatic
                   </button>
@@ -253,7 +255,7 @@ export default function Dashboard() {
 
                 <button
                   onClick={closeModal}
-                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-lg font-bold"
+                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl font-bold"
                   aria-label="Close modal"
                 >
                   &times;
@@ -268,9 +270,9 @@ export default function Dashboard() {
       <Link href="/faculty/chat/facultychat">
         <div className="fixed bottom-14 right-5 z-50">
           <div className="relative group animate-bounce">
-            <div className="absolute inset-0 rounded-full bg-red-600 opacity-70 blur-xl animate-ping"></div>
+            <div className="absolute inset-0 rounded-full bg-pink-400 opacity-60 blur-xl animate-ping"></div>
             <button
-              className="relative z-10 w-14 h-14 rounded-full bg-gradient-to-r from-red-500 to-red-700 text-white text-2xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300"
+              className="relative z-10 w-14 h-14 rounded-full bg-gradient-to-r from-pink-400 to-pink-600 text-white text-2xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300"
               title="Chatbot"
             >
               🤖

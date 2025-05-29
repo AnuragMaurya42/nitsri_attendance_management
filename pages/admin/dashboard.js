@@ -204,7 +204,7 @@ export default function Dashboard() {
 return (
   <div
     className="min-h-screen bg-white text-gray-900 flex flex-col items-center pt-16 pb-16 px-4"
-    style={{ paddingTop: "64px", paddingBottom: "64px" }} // space for fixed Navbar and Footer
+    style={{ paddingTop: "34px", paddingBottom: "64px" }} // space for fixed Navbar and Footer
   >
     <ToastContainer
       position="top-center"
