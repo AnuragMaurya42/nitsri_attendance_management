@@ -78,6 +78,14 @@ const StudentChat = () => {
         </li>
       );
     }
+
+
+
+
+
+
+
+
     return (
       <div className="animate-fadeIn">
         <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 bg-clip-text text-transparent mb-4">
@@ -206,22 +214,81 @@ const StudentChat = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
 return (
   <div className="flex flex-col h-screen max-w-md mx-auto bg-gradient-to-tr from-indigo-100 via-white to-indigo-50 shadow-2xl rounded-3xl overflow-hidden relative">
     
     {/* Thinner Header */}
-    <header className="bg-indigo-600 text-white text-center py-1 shadow-lg flex flex-col items-center justify-center space-y-1 fixed top-12 left-0 right-0 z-40">
-      <h1 className="text-2xl font-bold animate-fadeIn">💬 Student Chatbot</h1>
-      <p className="text-xs font-light">Ask about your attendance & courses</p>
-    </header>
+   
 
     {/* Messages Area */}
     <div className="flex-1 p-4 pt-32 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-indigo-200">
-      {messages.length === 0 && (
-        <div className="text-center text-indigo-700 text-lg font-semibold animate-fadeIn mt-10 px-4">
-          Hello! How can I assist you with your attendance queries today?
-        </div>
-      )}
+ 
+
+
+
+{messages.length === 0 && (
+ <div className="flex flex-col items-center justify-center h-full text-center space-y-6 animate-fadeIn">
+  {/* Typing Animation Text */}
+
+  {/* Animated GIF */}
+  <img
+    src="https://i.gifer.com/yy3.gif"
+    alt="Chat Bot Assistant"
+    style={{ width: '260px', height: '260px', objectFit: 'contain' }}
+  />
+
+  {/* Keyframes inside JSX */}
+  <style>
+    {`
+      @keyframes typing {
+        0% { width: 0 }
+        50% { width: 100% }
+        100% { width: 0 }
+      }
+
+      @keyframes blink {
+        0%, 100% { border-color: transparent }
+        50% { border-color: #6366f1 }
+      }
+    `}
+  </style>
+  <h2
+    className="text-2xl font-bold text-indigo-700"
+    style={{
+      display: 'inline-block',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      borderRight: '3px solid #6366f1',
+      animation: 'typing 3s steps(30, end) infinite, blink 0.75s step-end infinite'
+    }}
+  >
+    Student Chat Assistance
+  </h2>
+</div>
+
+)}
+
+
+
+
+
 
       {messages.map((msg, i) => (
         <div
