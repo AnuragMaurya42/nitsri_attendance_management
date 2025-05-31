@@ -124,6 +124,15 @@ export default function TakeAttendance() {
 
 
 
+
+
+
+
+
+
+
+
+
 return (
   <div
     className="flex flex-col h-screen max-w-md mx-auto bg-gradient-to-r from-red-400 to-pink-500 text-gray-900 font-sans shadow-md rounded-lg overflow-hidden"
@@ -134,7 +143,7 @@ return (
   >
 
     {/* Header */}
-    <header className="h-12 flex items-center justify-center bg-gradient-to-r from-red-400 to-pink-500text-white font-bold text-base shadow-md z-10">
+    <header className="h-12 flex items-center justify-center bg-gradient-to-r from-red-400 to-pink-500 text-white font-bold text-base shadow-md z-10">
       Take Attendance
     </header>
 
@@ -194,15 +203,11 @@ return (
         </button>
       </div>
 
-      {/* Attendance Header with Half1 and Half2 labels */}
+      {/* Attendance Header */}
       <section className="mb-2 px-3 flex justify-end space-x-6 text-xs font-semibold text-gray-700">
-        <div className="w-16 flex items-center justify-center">
-          Half 1
-        </div>
+        <div className="w-16 flex items-center justify-center">Half 1</div>
         {classDuration === "2" && (
-          <div className="w-16 flex items-center justify-center">
-            Half 2
-          </div>
+          <div className="w-16 flex items-center justify-center">Half 2</div>
         )}
       </section>
 
@@ -219,8 +224,6 @@ return (
                 <p className="text-red-600 font-semibold text-sm truncate">{student.name.split(" ")[0]}</p>
                 <p className="text-gray-600 text-xs">#{student.enrollmentNumber.slice(-3)}</p>
               </div>
-
-              {/* Checkboxes aligned under the header */}
               <div className="flex items-center space-x-6 text-sm">
                 <label className="flex items-center justify-center w-16 cursor-pointer">
                   <input
@@ -230,7 +233,6 @@ return (
                     className="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-400"
                   />
                 </label>
-
                 {classDuration === "2" && (
                   <label className="flex items-center justify-center w-16 cursor-pointer">
                     <input
@@ -262,14 +264,12 @@ return (
           Submit
         </button>
       </section>
-
     </main>
 
-  
-
+    {/* Toast Notifications */}
+    <ToastContainer />
   </div>
 );
-
 
 
 
