@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import io from 'socket.io-client';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Select from 'react-select';
 
 let socket;
 
@@ -23,8 +24,8 @@ export default function FacultyBluetoothPage() {
   const [attendanceStatuses, setAttendanceStatuses] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
   const [classDuration, setClassDuration] = useState('2');
-  const [manualName, setManualName] = useState('');
-  const [manualEnrollment, setManualEnrollment] = useState('');
+  const [allStudents, setAllStudents] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
     const socket = getSocket();
@@ -37,12 +38,14 @@ export default function FacultyBluetoothPage() {
       if (data.courseId !== courseId) return;
 
       setStudents((prev) => {
-        if (prev.some(s => s.enrollment === data.enrollment)) return prev;
+        if (prev.some(s => s.enrollmentNumber === data.enrollmentNumber)) return prev;
+
         setAttendanceStatuses((prevStatuses) => ({
           ...prevStatuses,
-          [data.enrollment]: { half1: true, half2: true },
+          [data.enrollmentNumber]: { half1: true, half2: true },
         }));
-        return [...prev, data];
+
+        return [...prev, { name: data.name, enrollmentNumber: data.enrollmentNumber }];
       });
     });
 
@@ -52,47 +55,72 @@ export default function FacultyBluetoothPage() {
     };
   }, [courseId]);
 
-  const handleCheckboxChange = (enrollment, half, checked) => {
+  useEffect(() => {
+    const fetchAllStudents = async () => {
+      if (courseId) {
+        try {
+          const res = await fetch(`/api/facultyapis/getStudentForCourse?courseCode=${courseId}`);
+          const data = await res.json();
+          if (data.Success) {
+            setAllStudents(data.students);
+          } else {
+            toast.error('Failed to fetch students.');
+          }
+        } catch (error) {
+          toast.error('Error fetching students.');
+        }
+      }
+    };
+    fetchAllStudents();
+  }, [courseId]);
+
+  const handleCheckboxChange = (enrollmentNumber, half, checked) => {
     setAttendanceStatuses((prev) => ({
       ...prev,
-      [enrollment]: {
-        ...prev[enrollment],
+      [enrollmentNumber]: {
+        ...prev[enrollmentNumber],
         [half]: checked,
       },
     }));
   };
 
-  const handleDeleteStudent = (enrollment) => {
-    setStudents((prev) => prev.filter(s => s.enrollment !== enrollment));
+  const handleDeleteStudent = (enrollmentNumber) => {
+    setStudents((prev) => prev.filter(s => s.enrollmentNumber !== enrollmentNumber));
     setAttendanceStatuses((prev) => {
       const newStatuses = { ...prev };
-      delete newStatuses[enrollment];
+      delete newStatuses[enrollmentNumber];
       return newStatuses;
     });
-    toast.info(`Student ${enrollment} removed.`);
+    toast.info(`Student ${enrollmentNumber} removed.`);
   };
 
-  const handleAddManualStudent = () => {
-    if (!manualName || !manualEnrollment) {
-      toast.error('Please enter both name and enrollment');
+  const handleAddStudent = () => {
+    if (!selectedStudent) {
+      toast.error('Please select a student');
       return;
     }
-    if (students.some(s => s.enrollment === manualEnrollment.trim())) {
-      toast.error('Enrollment already exists');
+
+    const existingStudent = allStudents.find(
+      (s) => s.enrollmentNumber === selectedStudent.value
+    );
+
+    if (students.some(s => s.enrollmentNumber === selectedStudent.value)) {
+      toast.error('Student already added');
       return;
     }
+
     const newStudent = {
-      name: manualName.trim(),
-      enrollment: manualEnrollment.trim(),
+      name: existingStudent.name,
+      enrollmentNumber: existingStudent.enrollmentNumber,
     };
+
     setStudents((prev) => [...prev, newStudent]);
     setAttendanceStatuses((prev) => ({
       ...prev,
-      [newStudent.enrollment]: { half1: true, half2: true },
+      [newStudent.enrollmentNumber]: { half1: true, half2: true },
     }));
-    setManualName('');
-    setManualEnrollment('');
-    toast.success('Student added manually');
+    setSelectedStudent(null);
+    toast.success('Student added');
   };
 
   const handleSubmit = async () => {
@@ -102,34 +130,44 @@ export default function FacultyBluetoothPage() {
     }
 
     const attendancePayload = students.map(student => {
-      const status = attendanceStatuses[student.enrollment] || { half1: false, half2: false };
+      const status = attendanceStatuses[student.enrollmentNumber] || { half1: false, half2: false };
       const presentCount = classDuration === '1'
         ? (status.half1 ? 1 : 0)
         : (status.half1 ? 1 : 0) + (status.half2 ? 1 : 0);
+
       return {
-        enrollmentNumber: student.enrollment,
+        enrollmentNumber: student.enrollmentNumber,
         name: student.name,
         presentCount,
       };
     });
 
-    const res = await fetch('/api/facultyapis/markAttendance', {
-      method: 'POST',
-      body: JSON.stringify({
-        courseCode: courseId,
-        selectedDate,
-        attendanceStatuses: attendancePayload,
-        classDuration,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const res = await fetch('/api/facultyapis/markAttendance', {
+        method: 'POST',
+        body: JSON.stringify({
+          courseCode: courseId,
+          selectedDate,
+          attendanceStatuses: attendancePayload,
+          classDuration,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    const data = await res.json();
-    if (data.Success) toast.success('Attendance marked successfully!');
-    else toast.error(data.ErrorMessage || 'Something went wrong!');
+      const data = await res.json();
+      if (data.Success) toast.success('Attendance marked successfully!');
+      else toast.error(data.ErrorMessage || 'Something went wrong!');
+    } catch (error) {
+      toast.error('Error submitting attendance.');
+    }
   };
+
+  const studentOptions = allStudents.map(student => ({
+    value: student.enrollmentNumber,
+    label: `${student.enrollmentNumber} (${student.name})`
+  }));
 
   return (
     <div className="min-h-screen pt-20 pb-14 px-4 max-w-md mx-auto bg-white rounded overflow-auto shadow">
@@ -148,12 +186,17 @@ export default function FacultyBluetoothPage() {
         </div>
       </div>
 
-      {/* Manual Add */}
+      {/* Add Student */}
       <div className="mb-4 p-3 bg-gray-50 border rounded">
-        <h2 className="text-sm font-semibold mb-2">Add Student Manually</h2>
-        <input placeholder="Name" value={manualName} onChange={e => setManualName(e.target.value)} className="w-full mb-2 border rounded p-2 text-sm" />
-        <input placeholder="Enrollment" value={manualEnrollment} onChange={e => setManualEnrollment(e.target.value)} className="w-full mb-2 border rounded p-2 text-sm" />
-        <button onClick={handleAddManualStudent} className="w-full bg-blue-600 text-white rounded py-2 text-sm">Add Student</button>
+        <h2 className="text-sm font-semibold mb-2">Add Student</h2>
+        <Select
+          options={studentOptions}
+          value={selectedStudent}
+          onChange={setSelectedStudent}
+          placeholder="Search student..."
+          isClearable
+        />
+        <button onClick={handleAddStudent} className="w-full bg-blue-600 text-white rounded py-2 text-sm mt-2">Add Student</button>
       </div>
 
       {/* Student Table */}
@@ -168,15 +211,32 @@ export default function FacultyBluetoothPage() {
           </tr>
         </thead>
         <tbody>
-          {students.map(({ name, enrollment }) => (
-            <tr key={enrollment}>
+          {students.map(({ name, enrollmentNumber }) => (
+            <tr key={enrollmentNumber}>
               <td className="border p-1">{name}</td>
-              <td className="border p-1">{enrollment}</td>
-              <td className="border p-1 text-center"><input type="checkbox" checked={attendanceStatuses[enrollment]?.half1 || false} onChange={e => handleCheckboxChange(enrollment, 'half1', e.target.checked)} /></td>
+              <td className="border p-1">{enrollmentNumber}</td>
+              <td className="border p-1 text-center">
+                <input
+                  type="checkbox"
+                  checked={attendanceStatuses[enrollmentNumber]?.half1 || false}
+                  onChange={e => handleCheckboxChange(enrollmentNumber, 'half1', e.target.checked)}
+                />
+              </td>
               {classDuration === '2' && (
-                <td className="border p-1 text-center"><input type="checkbox" checked={attendanceStatuses[enrollment]?.half2 || false} onChange={e => handleCheckboxChange(enrollment, 'half2', e.target.checked)} /></td>
+                <td className="border p-1 text-center">
+                  <input
+                    type="checkbox"
+                    checked={attendanceStatuses[enrollmentNumber]?.half2 || false}
+                    onChange={e => handleCheckboxChange(enrollmentNumber, 'half2', e.target.checked)}
+                  />
+                </td>
               )}
-              <td className="border p-1 text-red-500 text-center cursor-pointer" onClick={() => handleDeleteStudent(enrollment)}>✖</td>
+              <td
+                className="border p-1 text-red-500 text-center cursor-pointer"
+                onClick={() => handleDeleteStudent(enrollmentNumber)}
+              >
+                ✖
+              </td>
             </tr>
           ))}
         </tbody>
